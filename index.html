@@ -1,451 +1,403 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Kippstich – Testspieler-App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kippstich – Test-App (A–D)</title>
   <style>
     :root{
-      --violett: rgb(164, 27, 133);
-      --blau:    rgb(0, 107, 179);
-      --gruen:   rgb(0, 166, 82);
-      --orange:  rgb(249, 150, 30);
-
-      --bg: #0f1115;
-      --card: #161a22;
-      --line: #2a3140;
-      --text: #e9ecf1;
-      --muted:#aab3c2;
+      --bg:#0f1115;
+      --panel:#151925;
+      --text:#e8edf6;
+      --muted:#aeb7c6;
+      --outline:rgba(255,255,255,.14);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
     }
-
-    *{ box-sizing: border-box; }
+    *{box-sizing:border-box}
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 14px;
-    }
-
-    .wrap{
-      max-width: 920px;
-      margin: 0 auto;
-      display: grid;
-      gap: 12px;
-    }
-
-    header{
+      background: radial-gradient(1200px 700px at 30% 10%, #1b2140 0%, var(--bg) 55%);
+      color:var(--text);
+      min-height:100svh;
       display:flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #0c0f14;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
     }
-
+    .app{
+      width:min(720px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--outline);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+    .topbar{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
     .title{
-      display:flex; flex-direction:column; gap:2px;
-    }
-    .title h1{
-      margin:0;
-      font-size: 18px;
-      letter-spacing: .2px;
-    }
-    .title .sub{
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .controls{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    button{
-      appearance:none;
-      border: 1px solid var(--line);
-      background: #101522;
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 12px;
-      font-weight: 650;
-      cursor: pointer;
-    }
-    button:active{ transform: translateY(1px); }
-    button.secondary{
-      background: transparent;
-    }
-
-    .turn{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #0b0e13;
-      color: var(--text);
-      font-weight: 750;
-    }
-    .dot{
-      width: 10px; height: 10px; border-radius: 999px;
-      background: var(--muted);
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
-    }
-
-    .players{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 10px;
-    }
-    @media (max-width: 900px){
-      .players{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-    }
-    @media (max-width: 520px){
-      .players{ grid-template-columns: 1fr; }
-    }
-
-    .p{
-      border: 1px solid var(--line);
-      background: var(--card);
-      border-radius: 16px;
-      overflow:hidden;
       display:flex;
       flex-direction:column;
-      min-height: 140px;
+      gap:6px;
     }
-
-    .phead{
+    .title h1{
+      font-size:18px;
+      margin:0;
+      letter-spacing:.2px;
+    }
+    .title p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+      max-width:520px;
+    }
+    .controls{
       display:flex;
+      gap:10px;
       align-items:center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(0,0,0,0.18);
+      flex-wrap:wrap;
     }
-    .pname{
-      font-weight: 900;
-      letter-spacing: .3px;
-    }
-    .ptag{
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .tile{
-      margin: 12px;
-      border-radius: 14px;
-      height: 88px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      user-select:none;
+    button{
+      border:1px solid var(--outline);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
       cursor:pointer;
-      border: 1px solid rgba(255,255,255,0.12);
+      font-weight:600;
+    }
+    button:hover{ background: rgba(255,255,255,.10); }
+    .hint{
+      font-size:12px;
+      color:var(--muted);
     }
 
-    .tile .value{
-      font-size: 44px;
-      font-weight: 950;
-      color: #000;
-      line-height: 1;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+    .labels{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+      margin:10px 0 10px;
     }
-
-    .tile .hint{
-      position:absolute;
-      bottom: 8px;
-      left: 10px;
-      right: 10px;
-      font-size: 11px;
-      color: rgba(0,0,0,0.7);
-      font-weight: 700;
+    .label{
       text-align:center;
+      font-weight:800;
+      letter-spacing:2px;
+      color: rgba(255,255,255,.85);
+      font-size:14px;
     }
 
-    .tile .clearX{
-      position:absolute;
-      top: 8px;
-      right: 8px;
-      width: 28px;
-      height: 28px;
-      border-radius: 10px;
-      border: 1px solid rgba(0,0,0,0.2);
-      background: rgba(255,255,255,0.35);
-      color: #000;
-      font-weight: 900;
-      display:none;
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .card{
+      position:relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 18px;
+      border: 2px solid rgba(255,255,255,.22);
+      box-shadow: 0 12px 25px rgba(0,0,0,.25);
+      cursor:pointer;
+      display:flex;
       align-items:center;
       justify-content:center;
-      cursor:pointer;
+      user-select:none;
+      overflow:hidden;
+      transform: translateZ(0);
     }
-    .tile.hasValue .clearX{ display:flex; }
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.26), rgba(255,255,255,0) 55%);
+      transform: rotate(15deg);
+      pointer-events:none;
+    }
+    .card.active{
+      outline: 4px solid rgba(255,255,255,.65);
+      outline-offset: 2px;
+    }
+    .num{
+      position:relative;
+      z-index:2;
+      font-size: 54px;
+      font-weight: 900;
+      color:#000;
+      text-shadow: 0 2px 0 rgba(255,255,255,.25);
+      line-height:1;
+    }
+    .subrow{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      border:1px solid var(--outline);
+      background: rgba(255,255,255,.04);
+      padding:8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .pill b{ color: var(--text); }
 
-    .note{
-      margin: 0 12px 12px;
+    .grid-wrap{
+      margin-top:14px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+    .grid-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .grid-title h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .grid-title .small{
       color: var(--muted);
       font-size: 12px;
       line-height: 1.35;
     }
 
     .numbers{
-      border: 1px solid var(--line);
-      background: #0c0f14;
-      border-radius: 16px;
-      padding: 12px;
-    }
-    .numbers .label{
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 10px;
-    }
-    .grid{
       display:grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
     }
     .nbtn{
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 14px 0;
+      text-align:center;
       font-size: 18px;
       font-weight: 900;
-      background: #101522;
-      border: 1px solid var(--line);
-      text-align:center;
-      user-select:none;
+      border: 1px solid var(--outline);
+      background: rgba(255,255,255,.06);
       cursor:pointer;
+      user-select:none;
     }
-    .nbtn:active{ transform: translateY(1px); }
-    .nbtn.disabled{
-      opacity: .35;
-      cursor: not-allowed;
-    }
+    .nbtn:hover{ background: rgba(255,255,255,.12); }
+    .nbtn:active{ transform: scale(.985); }
 
     .footer{
+      margin-top: 10px;
       color: var(--muted);
       font-size: 12px;
-      text-align:center;
-      padding: 4px 0 0;
+      line-height: 1.35;
     }
+
+    .win{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(0,255,170,.35);
+      background: rgba(0,255,170,.08);
+      color: rgba(220,255,245,.95);
+      font-weight: 800;
+      display:none;
+    }
+    .win.show{ display:block; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
+  <div class="app">
+    <div class="topbar">
       <div class="title">
-        <h1>Kippstich – Testspieler-App</h1>
-        <div class="sub">Hack-Version: Zahl eintragen → bei Erfolg Kärtchen tippen → neue Farbe. Misserfolg: „Nächster Spieler“.</div>
+        <h1>Kippstich – Test-App (A–D)</h1>
+        <p>
+          Tippe zuerst dein Quadrat (A–D), dann die Zahl vom Würfel an deiner Farbe.
+          Die App zeigt automatisch <b>+1</b> (12→1). Bei Treffer: Tippe dein Quadrat, neue Farbe kommt.
+          Wer <b>4 Treffer</b> hat, gewinnt.
+        </p>
       </div>
       <div class="controls">
-        <button id="btnNext" title="Wenn der Spieler nicht überstochen hat">Nächster Spieler</button>
-        <button class="secondary" id="btnReset">Reset</button>
+        <button id="btnNew">Neues Spiel</button>
       </div>
-    </header>
-
-    <div class="turn">
-      <span class="pill"><span class="dot" id="turnDot"></span> Am Zug: <span id="turnName">SP1</span></span>
-      <span id="turnHelp">Tippe unten eine Zahl (Wert am Würfel neben deiner Farbe).</span>
     </div>
 
-    <section class="players" id="players"></section>
+    <div class="labels" aria-label="Spielerlabels">
+      <div class="label">A</div>
+      <div class="label">B</div>
+      <div class="label">C</div>
+      <div class="label">D</div>
+    </div>
 
-    <section class="numbers">
-      <div class="label">Zahlenblock (1–12). Aktiv ist nur der Spieler, der gerade am Zug ist.</div>
-      <div class="grid" id="numGrid"></div>
-    </section>
+    <div class="cards" id="cards" aria-label="Farbquadrate">
+      <!-- injected -->
+    </div>
 
-    <div class="footer">Tipp: ✕ am Kärtchen löscht die Zahl (für „fremde Karte wegkippen“ / Korrektur).</div>
+    <div class="subrow">
+      <div class="pill">Ausgewählt: <b id="selName">—</b></div>
+      <div class="pill">Treffer A/B/C/D: <b id="scores">0 / 0 / 0 / 0</b></div>
+    </div>
+
+    <div class="grid-wrap">
+      <div class="grid-title">
+        <h2>Zahlenblock (tippe die Zahl am Würfel an deiner Farbe)</h2>
+        <div class="small">Ergebnis im Quadrat ist automatisch <b>+1</b> (12→1).</div>
+      </div>
+
+      <div class="numbers" id="numbers" aria-label="Zahlenblock 1 bis 12">
+        <!-- injected -->
+      </div>
+
+      <div class="footer">
+        Tipp: Wenn ein anderer aus Versehen deine Zahl „wegkippt“, tippst du einfach dein eigenes Quadrat (wie bei eigenem Treffer).
+      </div>
+
+      <div class="win" id="winBox"></div>
+    </div>
   </div>
 
 <script>
-  // --- Farben (deine RGBs) ---
+  // Deine Spielerfarben (RGB) aus deinem Setup:
   const COLORS = [
-    { key: "gruen",   name: "Grün",   css: "var(--gruen)" },
-    { key: "blau",    name: "Blau",   css: "var(--blau)" },
-    { key: "violett", name: "Violett",css: "var(--violett)" },
-    { key: "orange",  name: "Orange", css: "var(--orange)" },
+    { name: "Violett", rgb: "rgb(164,27,133)" },
+    { name: "Blau",    rgb: "rgb(0,107,179)" },
+    { name: "Grün",    rgb: "rgb(0,166,82)" },
+    { name: "Orange",  rgb: "rgb(249,150,30)" },
   ];
 
-  const PLAYERS = ["SP1","SP2","SP3","SP4"];
+  const PLAYERS = ["A","B","C","D"];
+  const WIN_TARGET = 4;
 
   // State
-  let state = {
-    turnIndex: 0,
-    players: PLAYERS.map(() => ({
-      color: randColor(),
-      value: null, // Zahl im Kärtchen
-    }))
-  };
+  let selected = null; // index 0..3
+  let cards = [];      // [{colorIndex, displayNum|null}]
+  let scores = [0,0,0,0];
 
-  // --- Helpers ---
-  function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
-  function randColor(){ return COLORS[randInt(0, COLORS.length-1)]; }
+  const elCards = document.getElementById("cards");
+  const elNumbers = document.getElementById("numbers");
+  const elSelName = document.getElementById("selName");
+  const elScores = document.getElementById("scores");
+  const elWinBox = document.getElementById("winBox");
 
-  function currentPlayerIndex(){ return state.turnIndex; }
-  function currentPlayerName(){ return PLAYERS[currentPlayerIndex()]; }
+  function randInt(max){ return Math.floor(Math.random()*max); }
 
-  // --- UI Refs ---
-  const playersEl = document.getElementById("players");
-  const numGridEl = document.getElementById("numGrid");
-  const turnNameEl = document.getElementById("turnName");
-  const turnDotEl  = document.getElementById("turnDot");
-  const turnHelpEl = document.getElementById("turnHelp");
+  function plusOneWrap(n){
+    // n in 1..12
+    return (n === 12) ? 1 : (n + 1);
+  }
 
-  document.getElementById("btnNext").addEventListener("click", () => {
-    advanceTurn();
-  });
+  function newRandomCard(){
+    return { colorIndex: randInt(COLORS.length), displayNum: null };
+  }
 
-  document.getElementById("btnReset").addEventListener("click", () => {
-    state.turnIndex = 0;
-    state.players = PLAYERS.map(() => ({ color: randColor(), value: null }));
+  function resetGame(){
+    selected = null;
+    scores = [0,0,0,0];
+    cards = [newRandomCard(), newRandomCard(), newRandomCard(), newRandomCard()];
     render();
-  });
-
-  // --- Render Players ---
-  function renderPlayers(){
-    playersEl.innerHTML = "";
-    state.players.forEach((p, idx) => {
-      const isTurn = idx === currentPlayerIndex();
-      const wrap = document.createElement("div");
-      wrap.className = "p";
-
-      const head = document.createElement("div");
-      head.className = "phead";
-
-      const left = document.createElement("div");
-      left.innerHTML = `<div class="pname">${PLAYERS[idx]}</div><div class="ptag">${isTurn ? "am Zug" : "wartet"}</div>`;
-
-      const right = document.createElement("div");
-      right.className = "ptag";
-      right.textContent = `Zielfarbe: ${p.color.name}`;
-
-      head.appendChild(left);
-      head.appendChild(right);
-
-      const tile = document.createElement("div");
-      tile.className = "tile" + (p.value != null ? " hasValue" : "");
-      tile.style.background = p.color.css;
-
-      const val = document.createElement("div");
-      val.className = "value";
-      val.textContent = (p.value == null) ? "" : String(p.value);
-
-      const hint = document.createElement("div");
-      hint.className = "hint";
-      hint.textContent = (p.value == null)
-        ? (isTurn ? "Zahl unten wählen" : "wartet auf Zahl")
-        : (isTurn ? "Erfolg? Kärtchen tippen" : "Zahl steht");
-
-      const clearX = document.createElement("div");
-      clearX.className = "clearX";
-      clearX.textContent = "✕";
-      clearX.title = "Zahl löschen (für Korrektur / fremde Karte wegkippen)";
-
-      clearX.addEventListener("click", (e) => {
-        e.stopPropagation();
-        state.players[idx].value = null;
-        render();
-      });
-
-      // Klick auf Kärtchen:
-      // - nur sinnvoll, wenn Wert vorhanden
-      // - wenn Spieler am Zug: gilt als "Erfolg" -> neue Farbe, Wert löschen, nächster Spieler
-      tile.addEventListener("click", () => {
-        if (p.value == null) return;
-
-        if (isTurn){
-          // Erfolg
-          state.players[idx].color = randColor();
-          state.players[idx].value = null;
-          advanceTurn();
-        } else {
-          // Nicht am Zug: hier bewusst keine Aktion (damit keiner "fremde Erfolge" macht)
-          // Löschen geht über ✕
-        }
-      });
-
-      tile.appendChild(val);
-      tile.appendChild(hint);
-      tile.appendChild(clearX);
-
-      const note = document.createElement("div");
-      note.className = "note";
-      note.innerHTML = `
-        <div><b>So nutzt du das:</b> Zahl angetippt = Wert am Würfel neben deiner Farbe.</div>
-        <div><b>Erfolg:</b> Kärtchen tippen → neue Zielfarbe.</div>
-        <div><b>Misserfolg:</b> nichts tippen → „Nächster Spieler“.</div>
-      `;
-
-      wrap.appendChild(head);
-      wrap.appendChild(tile);
-      wrap.appendChild(note);
-      playersEl.appendChild(wrap);
-    });
+    setWin(null);
   }
 
-  // --- Render Number Grid (1..12) ---
-  function renderNumbers(){
-    numGridEl.innerHTML = "";
-    for (let n = 1; n <= 12; n++){
-      const btn = document.createElement("div");
-      btn.className = "nbtn";
-      btn.textContent = String(n);
-
-      const idx = currentPlayerIndex();
-      const p = state.players[idx];
-
-      // Nur aktiv, wenn current player noch keine Zahl gesetzt hat
-      const disabled = (p.value != null);
-      if (disabled) btn.classList.add("disabled");
-
-      btn.addEventListener("click", () => {
-        if (disabled) return;
-        // Zahl setzen
-        state.players[idx].value = n;
-        render();
-      });
-
-      numGridEl.appendChild(btn);
+  function setWin(text){
+    if(!text){
+      elWinBox.classList.remove("show");
+      elWinBox.textContent = "";
+      return;
     }
-  }
-
-  function renderTurn(){
-    turnNameEl.textContent = currentPlayerName();
-    const c = state.players[currentPlayerIndex()].color;
-    turnDotEl.style.background = c.css;
-
-    const p = state.players[currentPlayerIndex()];
-    if (p.value == null){
-      turnHelpEl.textContent = "Tippe unten die Zahl an, die am Würfel neben deiner Zielfarbe liegt.";
-    } else {
-      turnHelpEl.textContent = "Wenn der Kipp erfolgreich war: tippe dein Kärtchen. Wenn nicht: „Nächster Spieler“.";
-    }
-  }
-
-  function advanceTurn(){
-    state.turnIndex = (state.turnIndex + 1) % PLAYERS.length;
-    render();
+    elWinBox.textContent = text;
+    elWinBox.classList.add("show");
   }
 
   function render(){
-    renderTurn();
-    renderPlayers();
-    renderNumbers();
+    // cards
+    elCards.innerHTML = "";
+    cards.forEach((c, idx) => {
+      const div = document.createElement("div");
+      div.className = "card" + (selected === idx ? " active" : "");
+      div.style.background = COLORS[c.colorIndex].rgb;
+      div.title = `Spieler ${PLAYERS[idx]} – ${COLORS[c.colorIndex].name}`;
+
+      const num = document.createElement("div");
+      num.className = "num";
+      num.textContent = (c.displayNum == null) ? "" : String(c.displayNum);
+
+      div.appendChild(num);
+
+      // Click = select OR if number shown => treat as "Treffer / wegklicken"
+      div.addEventListener("click", () => {
+        // Wenn schon Gewinner da ist, trotzdem noch auswählbar? -> blockieren:
+        if (Math.max(...scores) >= WIN_TARGET) return;
+
+        // Wenn Zahl drinsteht: als Treffer werten, neue Farbe ohne Zahl
+        if(cards[idx].displayNum != null){
+          scores[idx] += 1;
+          cards[idx] = newRandomCard(); // neue Farbe, keine Zahl
+          selected = null; // nach Treffer Auswahl löschen (du regelst Reihenfolge selbst)
+          render();
+          updateMeta();
+
+          if(scores[idx] >= WIN_TARGET){
+            setWin(`✅ Spieler ${PLAYERS[idx]} gewinnt mit ${WIN_TARGET} Treffern!`);
+          }
+          return;
+        }
+
+        // sonst nur auswählen
+        selected = idx;
+        render();
+        updateMeta();
+      });
+
+      elCards.appendChild(div);
+    });
+
+    updateMeta();
   }
 
-  render();
+  function updateMeta(){
+    elSelName.textContent = (selected == null) ? "—" : `Spieler ${PLAYERS[selected]} (${COLORS[cards[selected].colorIndex].name})`;
+    elScores.textContent = `${scores[0]} / ${scores[1]} / ${scores[2]} / ${scores[3]}`;
+  }
+
+  function buildNumbers(){
+    elNumbers.innerHTML = "";
+    for(let n=1; n<=12; n++){
+      const b = document.createElement("div");
+      b.className = "nbtn";
+      b.textContent = n;
+
+      b.addEventListener("click", () => {
+        if (Math.max(...scores) >= WIN_TARGET) return;
+        if (selected == null) return; // erst Spieler wählen
+
+        // Du klickst die Zahl, die an deiner Farbe liegt -> App zeigt +1
+        const shown = plusOneWrap(n);
+        cards[selected].displayNum = shown;
+        render();
+      });
+
+      elNumbers.appendChild(b);
+    }
+  }
+
+  document.getElementById("btnNew").addEventListener("click", resetGame);
+
+  buildNumbers();
+  resetGame();
 </script>
 </body>
-</html>
+      </html>
