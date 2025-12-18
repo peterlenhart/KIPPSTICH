@@ -54,10 +54,11 @@ h1{
 h1 span{ font-weight:500; }
 
 .card-frame{
+  position:relative;            /* ✅ neu */
   background:var(--bamboo);
   padding:14px;
   border-radius:18px;
-  margin-bottom:10px;
+  margin-bottom:12px;           /* ein bisschen Luft */
 }
 
 .card{
@@ -67,23 +68,41 @@ h1 span{ font-weight:500; }
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:160px;     /* Zahl größer */
+  font-size:160px;
   font-weight:900;
   color:#000;
   user-select:none;
 }
 
 .card.empty{
-  background:var(--wood-bg-dark); /* dunkelbraun */
+  background:var(--wood-bg-dark);
   color:#fff;
   font-size:26px;
   letter-spacing:1px;
 }
 
+.count-badge{
+  position:absolute;
+  left:50%;
+  bottom:20px;                  /* ✅ sitzt “im Kärtchenbereich” */
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.25);
+  color:#fff;
+  padding:6px 12px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:16px;
+  letter-spacing:0.3px;
+  user-select:none;
+  pointer-events:none;
+}
+
 .status{
-  text-align:center;
-  margin:8px 0;
-  font-weight:600;
+  /* ✅ Statuszeile bleibt, nimmt aber keinen Platz mehr ein */
+  height:0;
+  margin:0;
+  padding:0;
+  overflow:hidden;
 }
 
 button{
@@ -106,7 +125,7 @@ button{
 .num{
   background:var(--tile);
   border-radius:10px;
-  padding:20px 0;   /* hochformatig */
+  padding:20px 0;
   font-size:22px;
   font-weight:700;
   text-align:center;
@@ -125,6 +144,7 @@ button{
 
     <div class="card-frame">
       <div id="card" class="card"></div>
+      <div id="badge" class="count-badge"></div>
     </div>
 
     <div id="status" class="status"></div>
@@ -145,11 +165,10 @@ let currentColor = null;
 let gameOver = false;
 
 const card = document.getElementById("card");
-const status = document.getElementById("status");
+const badge = document.getElementById("badge");
 const numbers = document.getElementById("numbers");
 const resetBtn = document.getElementById("resetBtn");
 
-/* Zahlenblock */
 for(let i=1;i<=12;i++){
   const d=document.createElement("div");
   d.className="num";
@@ -171,15 +190,22 @@ function startGame(){
   resetBtn.textContent = "Reset";
   enableNumbers(true);
 
-  // neue Karte (mit neuer Farbe) zum Start
   currentColor = colors[Math.floor(Math.random()*colors.length)];
   showCardEmptyNumber();
-  status.textContent = `Noch ${remaining} Kärtchen`;
+  updateBadge();
+}
+
+function updateBadge(){
+  if(gameOver){
+    badge.textContent = "";
+    return;
+  }
+  badge.textContent = `Noch ${remaining} Kärtchen`;
 }
 
 function showCardEmptyNumber(){
   card.className = "card";
-  card.style.background = currentColor;  // Farbe bleibt beim Reset gleich
+  card.style.background = currentColor;
   card.textContent = "";
   currentValue = null;
 }
@@ -189,27 +215,24 @@ function endGame(){
   enableNumbers(false);
   resetBtn.textContent = "Neues Spiel";
 
-  // WICHTIG: Inline-Farbe überschreiben, sonst bleibt alte Farbe sichtbar
   card.className = "card empty";
-  card.style.background = "";            // Inline löschen
+  card.style.background = "";
   card.textContent = "GEWONNEN";
-  status.textContent = "";
+  badge.textContent = "";          // ✅ kein Badge im Endscreen
 }
 
-/* Zyklisches +1: 12 -> 1 */
 function plusOneCyclic(n){
   return (n % 12) + 1;
 }
 
 function pickNumber(n){
   if(gameOver) return;
-  if(currentValue !== null) return;      // schon gewählt
+  if(currentValue !== null) return;
 
-  currentValue = plusOneCyclic(n);       // ✅ FIX: zyklisch
+  currentValue = plusOneCyclic(n);
   card.textContent = currentValue;
 }
 
-/* Kartenklick: nur wenn Zahl gesetzt */
 card.onclick = ()=>{
   if(gameOver) return;
   if(currentValue === null) return;
@@ -217,23 +240,20 @@ card.onclick = ()=>{
   remaining--;
 
   if(remaining <= 0){
-    endGame();                           // ✅ FIX: kein neues farbiges Kärtchen mehr
+    endGame();
     return;
   }
 
-  // nächste Karte: neue Farbe, aber leer
   currentColor = colors[Math.floor(Math.random()*colors.length)];
   showCardEmptyNumber();
-  status.textContent = `Noch ${remaining} Kärtchen`;
+  updateBadge();
 };
 
-/* Reset: NUR Zahl löschen, Farbe bleibt */
 resetBtn.onclick = ()=>{
   if(gameOver){
     startGame();
     return;
   }
-  // nur Zahl weg
   currentValue = null;
   card.textContent = "";
 };
