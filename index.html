@@ -1,200 +1,451 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Kippstich – BoxPot</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kippstich – Testspieler-App</title>
+  <style>
+    :root{
+      --violett: rgb(164, 27, 133);
+      --blau:    rgb(0, 107, 179);
+      --gruen:   rgb(0, 166, 82);
+      --orange:  rgb(249, 150, 30);
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background:#111;
-  color:#fff;
-  margin:0;
-  padding:16px;
-}
+      --bg: #0f1115;
+      --card: #161a22;
+      --line: #2a3140;
+      --text: #e9ecf1;
+      --muted:#aab3c2;
+    }
 
-h1 { text-align:center; }
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 14px;
+    }
 
-.section {
-  margin-bottom:20px;
-  padding:12px;
-  border:1px solid #333;
-  border-radius:8px;
-}
+    .wrap{
+      max-width: 920px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+    }
 
-button {
-  padding:10px 14px;
-  margin:4px;
-  font-size:16px;
-  border-radius:6px;
-  border:none;
-  cursor:pointer;
-}
+    header{
+      display:flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #0c0f14;
+    }
 
-button.primary { background:#444; color:white; }
-button.danger  { background:#900; color:white; }
+    .title{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .title h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+    .title .sub{
+      color: var(--muted);
+      font-size: 12px;
+    }
 
-.color-picker button {
-  width:60px;
-  height:40px;
-}
+    .controls{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
 
-.number-grid {
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap:6px;
-}
+    button{
+      appearance:none;
+      border: 1px solid var(--line);
+      background: #101522;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    button:active{ transform: translateY(1px); }
+    button.secondary{
+      background: transparent;
+    }
 
-.number-grid button {
-  background:#222;
-  color:white;
-}
+    .turn{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #0b0e13;
+      color: var(--text);
+      font-weight: 750;
+    }
+    .dot{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: var(--muted);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+    }
 
-.card-area {
-  position:relative;
-  height:160px;
-  margin-top:10px;
-}
+    .players{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+    }
+    @media (max-width: 900px){
+      .players{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 520px){
+      .players{ grid-template-columns: 1fr; }
+    }
 
-.card {
-  width:90px;
-  height:120px;
-  border-radius:8px;
-  position:absolute;
-  top:0;
-  left:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:32px;
-  font-weight:bold;
-  color:black;
-  box-shadow:0 4px 8px rgba(0,0,0,0.5);
-}
+    .p{
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 16px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 140px;
+    }
 
-.supercard {
-  border:4px dashed black;
-}
+    .phead{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(0,0,0,0.18);
+    }
+    .pname{
+      font-weight: 900;
+      letter-spacing: .3px;
+    }
+    .ptag{
+      font-size: 12px;
+      color: var(--muted);
+    }
 
-#boxpotValue {
-  font-size:20px;
-  margin-top:10px;
-}
-</style>
+    .tile{
+      margin: 12px;
+      border-radius: 14px;
+      height: 88px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      user-select:none;
+      cursor:pointer;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .tile .value{
+      font-size: 44px;
+      font-weight: 950;
+      color: #000;
+      line-height: 1;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+    }
+
+    .tile .hint{
+      position:absolute;
+      bottom: 8px;
+      left: 10px;
+      right: 10px;
+      font-size: 11px;
+      color: rgba(0,0,0,0.7);
+      font-weight: 700;
+      text-align:center;
+    }
+
+    .tile .clearX{
+      position:absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.35);
+      color: #000;
+      font-weight: 900;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+    }
+    .tile.hasValue .clearX{ display:flex; }
+
+    .note{
+      margin: 0 12px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .numbers{
+      border: 1px solid var(--line);
+      background: #0c0f14;
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .numbers .label{
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 8px;
+    }
+    .nbtn{
+      border-radius: 14px;
+      padding: 14px 0;
+      font-size: 18px;
+      font-weight: 900;
+      background: #101522;
+      border: 1px solid var(--line);
+      text-align:center;
+      user-select:none;
+      cursor:pointer;
+    }
+    .nbtn:active{ transform: translateY(1px); }
+    .nbtn.disabled{
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .footer{
+      color: var(--muted);
+      font-size: 12px;
+      text-align:center;
+      padding: 4px 0 0;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Kippstich – Testspieler-App</h1>
+        <div class="sub">Hack-Version: Zahl eintragen → bei Erfolg Kärtchen tippen → neue Farbe. Misserfolg: „Nächster Spieler“.</div>
+      </div>
+      <div class="controls">
+        <button id="btnNext" title="Wenn der Spieler nicht überstochen hat">Nächster Spieler</button>
+        <button class="secondary" id="btnReset">Reset</button>
+      </div>
+    </header>
 
-<h1>Kippstich – BoxPot</h1>
+    <div class="turn">
+      <span class="pill"><span class="dot" id="turnDot"></span> Am Zug: <span id="turnName">SP1</span></span>
+      <span id="turnHelp">Tippe unten eine Zahl (Wert am Würfel neben deiner Farbe).</span>
+    </div>
 
-<div class="section">
-  <h3>Startkarte</h3>
-  <button class="primary" onclick="generateStartCard()">🎲 Startkarte generieren</button>
-</div>
+    <section class="players" id="players"></section>
 
-<div class="section">
-  <h3>Farbe wählen</h3>
-  <div class="color-picker">
-    <button style="background:#00A652" onclick="selectColor('gruen')"></button>
-    <button style="background:#F9961E" onclick="selectColor('orange')"></button>
-    <button style="background:#A41B85" onclick="selectColor('violett')"></button>
-    <button style="background:#006BB3" onclick="selectColor('blau')"></button>
+    <section class="numbers">
+      <div class="label">Zahlenblock (1–12). Aktiv ist nur der Spieler, der gerade am Zug ist.</div>
+      <div class="grid" id="numGrid"></div>
+    </section>
+
+    <div class="footer">Tipp: ✕ am Kärtchen löscht die Zahl (für „fremde Karte wegkippen“ / Korrektur).</div>
   </div>
-</div>
-
-<div class="section">
-  <h3>Zahl wählen</h3>
-  <div class="number-grid" id="numberGrid"></div>
-</div>
-
-<div class="section">
-  <button class="primary" onclick="setCard()">➕ Karte in BoxPot legen</button>
-  <button class="primary" onclick="superKipp()">⚡ Superkipp</button>
-  <button class="danger" onclick="superFail()">❌ Superkipp fehlgeschlagen</button>
-</div>
-
-<div class="section">
-  <h3>BoxPot</h3>
-  <div class="card-area" id="cardArea"></div>
-  <div id="boxpotValue">BoxPot: 0</div>
-</div>
 
 <script>
-const COLORS = {
-  gruen:  "#00A652",
-  orange: "#F9961E",
-  violett:"#A41B85",
-  blau:   "#006BB3"
-};
+  // --- Farben (deine RGBs) ---
+  const COLORS = [
+    { key: "gruen",   name: "Grün",   css: "var(--gruen)" },
+    { key: "blau",    name: "Blau",   css: "var(--blau)" },
+    { key: "violett", name: "Violett",css: "var(--violett)" },
+    { key: "orange",  name: "Orange", css: "var(--orange)" },
+  ];
 
-let selectedColor = null;
-let selectedNumber = null;
-let boxpot = [];
+  const PLAYERS = ["SP1","SP2","SP3","SP4"];
 
-const numberGrid = document.getElementById("numberGrid");
-for (let i=1;i<=12;i++) {
-  const b = document.createElement("button");
-  b.textContent = i;
-  b.onclick = () => selectNumber(i);
-  numberGrid.appendChild(b);
-}
+  // State
+  let state = {
+    turnIndex: 0,
+    players: PLAYERS.map(() => ({
+      color: randColor(),
+      value: null, // Zahl im Kärtchen
+    }))
+  };
 
-function selectColor(c) {
-  selectedColor = c;
-}
+  // --- Helpers ---
+  function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function randColor(){ return COLORS[randInt(0, COLORS.length-1)]; }
 
-function selectNumber(n) {
-  selectedNumber = n;
-}
+  function currentPlayerIndex(){ return state.turnIndex; }
+  function currentPlayerName(){ return PLAYERS[currentPlayerIndex()]; }
 
-function generateStartCard() {
-  const colors = Object.keys(COLORS);
-  selectedColor = colors[Math.floor(Math.random()*4)];
-  selectedNumber = Math.floor(Math.random()*12)+1;
-  setCard();
-}
+  // --- UI Refs ---
+  const playersEl = document.getElementById("players");
+  const numGridEl = document.getElementById("numGrid");
+  const turnNameEl = document.getElementById("turnName");
+  const turnDotEl  = document.getElementById("turnDot");
+  const turnHelpEl = document.getElementById("turnHelp");
 
-function setCard() {
-  if (!selectedColor || !selectedNumber) return;
-  boxpot.push({color:selectedColor, number:selectedNumber});
-  render();
-}
-
-function superKipp() {
-  const colors = Object.keys(COLORS);
-  const c = colors[Math.floor(Math.random()*4)];
-  const n = Math.floor(Math.random()*12)+1;
-  boxpot.push({color:c, number:n, super:true});
-  render();
-}
-
-function superFail() {
-  if (boxpot.length > 0) {
-    boxpot.shift();
-    render();
-  }
-}
-
-function render() {
-  const area = document.getElementById("cardArea");
-  area.innerHTML = "";
-  let sum = 0;
-
-  boxpot.forEach((c,i) => {
-    sum += c.number;
-    const d = document.createElement("div");
-    d.className = "card" + (c.super ? " supercard" : "");
-    d.style.background = COLORS[c.color];
-    d.style.left = (i*18)+"px";
-    d.textContent = c.number;
-    area.appendChild(d);
+  document.getElementById("btnNext").addEventListener("click", () => {
+    advanceTurn();
   });
 
-  document.getElementById("boxpotValue").textContent =
-    "BoxPot: " + sum;
-}
-</script>
+  document.getElementById("btnReset").addEventListener("click", () => {
+    state.turnIndex = 0;
+    state.players = PLAYERS.map(() => ({ color: randColor(), value: null }));
+    render();
+  });
 
+  // --- Render Players ---
+  function renderPlayers(){
+    playersEl.innerHTML = "";
+    state.players.forEach((p, idx) => {
+      const isTurn = idx === currentPlayerIndex();
+      const wrap = document.createElement("div");
+      wrap.className = "p";
+
+      const head = document.createElement("div");
+      head.className = "phead";
+
+      const left = document.createElement("div");
+      left.innerHTML = `<div class="pname">${PLAYERS[idx]}</div><div class="ptag">${isTurn ? "am Zug" : "wartet"}</div>`;
+
+      const right = document.createElement("div");
+      right.className = "ptag";
+      right.textContent = `Zielfarbe: ${p.color.name}`;
+
+      head.appendChild(left);
+      head.appendChild(right);
+
+      const tile = document.createElement("div");
+      tile.className = "tile" + (p.value != null ? " hasValue" : "");
+      tile.style.background = p.color.css;
+
+      const val = document.createElement("div");
+      val.className = "value";
+      val.textContent = (p.value == null) ? "" : String(p.value);
+
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = (p.value == null)
+        ? (isTurn ? "Zahl unten wählen" : "wartet auf Zahl")
+        : (isTurn ? "Erfolg? Kärtchen tippen" : "Zahl steht");
+
+      const clearX = document.createElement("div");
+      clearX.className = "clearX";
+      clearX.textContent = "✕";
+      clearX.title = "Zahl löschen (für Korrektur / fremde Karte wegkippen)";
+
+      clearX.addEventListener("click", (e) => {
+        e.stopPropagation();
+        state.players[idx].value = null;
+        render();
+      });
+
+      // Klick auf Kärtchen:
+      // - nur sinnvoll, wenn Wert vorhanden
+      // - wenn Spieler am Zug: gilt als "Erfolg" -> neue Farbe, Wert löschen, nächster Spieler
+      tile.addEventListener("click", () => {
+        if (p.value == null) return;
+
+        if (isTurn){
+          // Erfolg
+          state.players[idx].color = randColor();
+          state.players[idx].value = null;
+          advanceTurn();
+        } else {
+          // Nicht am Zug: hier bewusst keine Aktion (damit keiner "fremde Erfolge" macht)
+          // Löschen geht über ✕
+        }
+      });
+
+      tile.appendChild(val);
+      tile.appendChild(hint);
+      tile.appendChild(clearX);
+
+      const note = document.createElement("div");
+      note.className = "note";
+      note.innerHTML = `
+        <div><b>So nutzt du das:</b> Zahl angetippt = Wert am Würfel neben deiner Farbe.</div>
+        <div><b>Erfolg:</b> Kärtchen tippen → neue Zielfarbe.</div>
+        <div><b>Misserfolg:</b> nichts tippen → „Nächster Spieler“.</div>
+      `;
+
+      wrap.appendChild(head);
+      wrap.appendChild(tile);
+      wrap.appendChild(note);
+      playersEl.appendChild(wrap);
+    });
+  }
+
+  // --- Render Number Grid (1..12) ---
+  function renderNumbers(){
+    numGridEl.innerHTML = "";
+    for (let n = 1; n <= 12; n++){
+      const btn = document.createElement("div");
+      btn.className = "nbtn";
+      btn.textContent = String(n);
+
+      const idx = currentPlayerIndex();
+      const p = state.players[idx];
+
+      // Nur aktiv, wenn current player noch keine Zahl gesetzt hat
+      const disabled = (p.value != null);
+      if (disabled) btn.classList.add("disabled");
+
+      btn.addEventListener("click", () => {
+        if (disabled) return;
+        // Zahl setzen
+        state.players[idx].value = n;
+        render();
+      });
+
+      numGridEl.appendChild(btn);
+    }
+  }
+
+  function renderTurn(){
+    turnNameEl.textContent = currentPlayerName();
+    const c = state.players[currentPlayerIndex()].color;
+    turnDotEl.style.background = c.css;
+
+    const p = state.players[currentPlayerIndex()];
+    if (p.value == null){
+      turnHelpEl.textContent = "Tippe unten die Zahl an, die am Würfel neben deiner Zielfarbe liegt.";
+    } else {
+      turnHelpEl.textContent = "Wenn der Kipp erfolgreich war: tippe dein Kärtchen. Wenn nicht: „Nächster Spieler“.";
+    }
+  }
+
+  function advanceTurn(){
+    state.turnIndex = (state.turnIndex + 1) % PLAYERS.length;
+    render();
+  }
+
+  function render(){
+    renderTurn();
+    renderPlayers();
+    renderNumbers();
+  }
+
+  render();
+</script>
 </body>
 </html>
