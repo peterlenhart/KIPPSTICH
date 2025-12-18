@@ -1,291 +1,221 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KIPPStich</title>
-  <style>
-    :root{
-      /* warmes Innenraum-Beige (wie Kippbox) */
-      --bg: #d7c7a8;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIPPStich</title>
 
-      /* Bambus/holziger Rand */
-      --bamboo: #c7a36a;
-      --bamboo-dark: #a9854d;
+<style>
+:root{
+  --wood-bg:#b07a52;      /* dunklerer Holzton */
+  --wood-bg-dark:#9a6845;
+  --bamboo:#d6c3a0;
+  --tile:#efe6d2;
+  --ink:#111;
 
-      --ink: #111;
-      --panel: rgba(255,255,255,0.25);
-    }
+  --green:#00a652;
+  --violet:#a41b85;
+  --blue:#006bb3;
+  --orange:#f9961e;
+}
 
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-      display:flex;
-      min-height:100vh;
-      align-items:center;
-      justify-content:center;
-    }
+*{
+  box-sizing:border-box;
+  touch-action:manipulation;
+}
 
-    .app{
-      width:min(520px, 92vw);
-      padding: 18px 16px 18px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.16);
-      border: 2px solid rgba(0,0,0,0.08);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-    }
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;              /* 🔒 kein Scrollen */
+  background:var(--wood-bg-dark);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
-    .title{
-      text-align:center;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      font-size: clamp(32px, 5.5vw, 44px);
-      margin: 4px 0 14px;
-    }
+/* Fixierte Spielfläche */
+.stage{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(
+    180deg,
+    var(--wood-bg),
+    var(--wood-bg-dark)
+  );
+}
 
-    /* Kartenbereich */
-    .cardWrap{
-      display:flex;
-      justify-content:center;
-      margin: 8px 0 10px;
-    }
+/* Spielbrett */
+.app{
+  width:100%;
+  max-width:420px;
+  height:100%;
+  max-height:780px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
 
-    .card{
-      width:min(360px, 86vw);
-      aspect-ratio: 1 / 1;
-      border-radius: 20px;
-      background: var(--cardColor, #9ad39a);
-      position:relative;
-      border: 10px solid var(--bamboo);
-      box-shadow:
-        0 18px 28px rgba(0,0,0,0.18),
-        inset 0 0 0 3px rgba(0,0,0,0.10);
-      user-select:none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
+/* Titel */
+h1{
+  margin:10px 0 12px;
+  text-align:center;
+  font-size:28px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+h1 span{font-weight:500}
 
-    /* leichter 3D-Karton-Look: linke + untere Kante */
-    .card::before{
-      content:"";
-      position:absolute;
-      left:-10px;
-      top:10px;
-      bottom:-10px;
-      width:14px;
-      border-radius: 18px 0 0 18px;
-      background: var(--bamboo-dark);
-      filter: brightness(0.95);
-      opacity:0.75;
-    }
-    .card::after{
-      content:"";
-      position:absolute;
-      left:10px;
-      right:-10px;
-      bottom:-10px;
-      height:14px;
-      border-radius: 0 0 18px 18px;
-      background: var(--bamboo-dark);
-      filter: brightness(0.95);
-      opacity:0.75;
-    }
+/* Kartenrahmen */
+.card-frame{
+  background:var(--bamboo);
+  padding:14px;
+  border-radius:18px;
+  margin-bottom:10px;
+}
 
-    /* Die Zahl: jetzt deutlich größer */
-    .bigNum{
-      font-weight: 900;
-      color: #000;
-      line-height: 1;
-      /* Sehr groß, füllt die Karte */
-      font-size: clamp(120px, 28vw, 200px);
-      transform: translateY(2px);
-      text-shadow: 0 2px 0 rgba(255,255,255,0.20);
-    }
+/* Karte */
+.card{
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:64px;
+  font-weight:800;
+  color:#000;
+  user-select:none;
+}
 
-    .hintRow{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap: 10px;
-      margin: 6px 2px 12px;
-      font-size: 14px;
-      opacity:0.9;
-    }
+.card.empty{
+  background:#000;
+  color:#fff;
+  font-size:24px;
+}
 
-    .remaining{
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: var(--panel);
-      border: 1px solid rgba(0,0,0,0.10);
-      font-weight: 700;
-    }
+/* Status */
+.status{
+  text-align:center;
+  margin:8px 0;
+  font-weight:600;
+}
 
-    .resetBtn{
-      appearance:none;
-      border:none;
-      cursor:pointer;
-      padding: 10px 14px;
-      border-radius: 12px;
-      background: rgba(0,0,0,0.12);
-      color: #111;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-      border: 1px solid rgba(0,0,0,0.14);
-    }
-    .resetBtn:active{ transform: translateY(1px); }
+/* Reset */
+.reset-btn{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#222;
+  color:#fff;
+  font-size:16px;
+  margin-bottom:10px;
+}
 
-    /* Zahlenblock */
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 8px;
-    }
+/* Zahlenblock */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
 
-    .numBtn{
-      height: 58px;              /* hochformatiger Look */
-      border-radius: 14px;
-      border: 2px solid rgba(0,0,0,0.12);
-      background: rgba(255,255,255,0.42);
-      font-size: 20px;
-      font-weight: 900;
-      cursor:pointer;
-      user-select:none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.10);
-    }
-    .numBtn:active{ transform: translateY(1px); }
+.num{
+  background:var(--tile);
+  border-radius:10px;
+  padding:18px 0;     /* 🔼 hochformatiger */
+  font-size:22px;
+  font-weight:700;
+  text-align:center;
+  user-select:none;
+}
 
-    .footer{
-      text-align:center;
-      margin-top: 10px;
-      font-size: 13px;
-      opacity: 0.85;
-    }
-  </style>
+.num:active{
+  transform:scale(0.95);
+}
+</style>
 </head>
 
 <body>
+<div class="stage">
   <div class="app">
-    <div class="title">KIPPStich</div>
 
-    <div class="cardWrap">
-      <div id="card" class="card" title="Karte antippen = nächstes Kärtchen (nur bei gesetzter Zahl)">
-        <div id="num" class="bigNum"></div>
-      </div>
+    <h1>KIPP<span>Stich</span></h1>
+
+    <div class="card-frame">
+      <div id="card" class="card"></div>
     </div>
 
-    <div class="hintRow">
-      <div id="remaining" class="remaining">Noch 4 Kärtchen</div>
-      <button id="resetBtn" class="resetBtn" type="button">Reset Zahl</button>
-    </div>
+    <div id="status" class="status"></div>
 
-    <div class="grid" id="grid"></div>
+    <button class="reset-btn" onclick="resetGame()">Reset</button>
 
-    <div class="footer">Zahl klicken → Karte zeigt automatisch <b>+1</b>. Karte klicken → nächstes Kärtchen.</div>
+    <div class="grid" id="numbers"></div>
+
   </div>
+</div>
 
 <script>
-  // Farben (aus deinem LENNOY-Set)
-  const COLORS = [
-    { name: "Violett", css: "rgb(164, 27, 133)" },
-    { name: "Blau",    css: "rgb(0, 107, 179)" },
-    { name: "Grün",    css: "rgb(0, 166, 82)" },
-    { name: "Gelb",    css: "rgb(249, 150, 30)" }
-  ];
+const colors=[
+  {val:"#00a652"},
+  {val:"#a41b85"},
+  {val:"#006bb3"},
+  {val:"#f9961e"}
+];
 
-  const cardEl = document.getElementById("card");
-  const numEl  = document.getElementById("num");
-  const gridEl = document.getElementById("grid");
-  const remainingEl = document.getElementById("remaining");
-  const resetBtn = document.getElementById("resetBtn");
+let remaining=4;
+let currentValue=null;
 
-  // Spielstatus
-  let remainingCards = 4;        // wie viele Kärtchen noch übrig
-  let cardColor = randomColor(); // wird NICHT durch Reset geändert
-  let currentShownNumber = null; // die Zahl, die aktuell in der Karte steht (bereits +1 gerechnet)
+const card=document.getElementById("card");
+const status=document.getElementById("status");
+const numbers=document.getElementById("numbers");
 
-  function randomColor(){
-    return COLORS[Math.floor(Math.random()*COLORS.length)];
+for(let i=1;i<=12;i++){
+  const d=document.createElement("div");
+  d.className="num";
+  d.textContent=i;
+  d.onclick=()=>pickNumber(i);
+  numbers.appendChild(d);
+}
+
+function newCard(){
+  if(remaining<=0){
+    card.className="card empty";
+    card.textContent="GEWONNEN";
+    status.textContent="";
+    return;
   }
+  const c=colors[Math.floor(Math.random()*colors.length)];
+  card.className="card";
+  card.style.background=c.val;
+  card.textContent="";
+  currentValue=null;
+  status.textContent=`Noch ${remaining} Kärtchen`;
+}
 
-  function setCardColor(color){
-    cardEl.style.setProperty("--cardColor", color.css);
-  }
+function pickNumber(n){
+  if(currentValue!==null || remaining<=0) return;
+  currentValue=n+1;
+  card.textContent=currentValue;
+}
 
-  function updateRemainingLabel(){
-    if (remainingCards <= 0){
-      remainingEl.textContent = "Gewonnen!";
-      // Karte schwarz + Text
-      setCardColor({css:"#111"});
-      numEl.textContent = "Gewonnen";
-      numEl.style.fontSize = "clamp(34px, 7.2vw, 44px)";
-      numEl.style.color = "#fff";
-      return;
-    }
-    remainingEl.textContent = `Noch ${remainingCards} Kärtchen`;
-    // wenn wir aus "Gewonnen" zurück kämen (Neuladen), Standard wieder herstellen
-    numEl.style.fontSize = "";
-    numEl.style.color = "#000";
-  }
+card.onclick=()=>{
+  if(currentValue===null || remaining<=0) return;
+  remaining--;
+  newCard();
+};
 
-  // Reset soll NUR die Zahl löschen (nicht Farbe, nicht Remaining!)
-  function resetOnlyNumber(){
-    currentShownNumber = null;
-    numEl.textContent = "";
-  }
+function resetGame(){
+  remaining=4;
+  newCard();
+}
 
-  function handleNumberClick(n){
-    if (remainingCards <= 0) return;
-    // Anzeige = n + 1 (mit 12→1 Logik)
-    const plusOne = (n === 12) ? 1 : (n + 1);
-    currentShownNumber = plusOne;
-    numEl.textContent = String(plusOne);
-  }
-
-  function handleCardClick(){
-    if (remainingCards <= 0) return;
-    // nur wenn bereits eine Zahl gesetzt ist, darf die Karte "abgelegt" werden
-    if (currentShownNumber === null) return;
-
-    remainingCards -= 1;
-    resetOnlyNumber();
-
-    if (remainingCards <= 0){
-      updateRemainingLabel();
-      return;
-    }
-
-    // neue Karte (neue Farbe), ohne Zahl
-    cardColor = randomColor();
-    setCardColor(cardColor);
-    updateRemainingLabel();
-  }
-
-  // Zahlenblock 1..12
-  for (let i=1; i<=12; i++){
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "numBtn";
-    b.textContent = i;
-    b.addEventListener("click", () => handleNumberClick(i));
-    gridEl.appendChild(b);
-  }
-
-  // Events
-  cardEl.addEventListener("click", handleCardClick);
-  resetBtn.addEventListener("click", resetOnlyNumber);
-
-  // Init
-  setCardColor(cardColor);
-  updateRemainingLabel();
-  resetOnlyNumber();
+newCard();
 </script>
+
 </body>
-</html>
+  </html>
