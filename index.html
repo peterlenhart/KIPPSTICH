@@ -1,440 +1,200 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Kippstich – BoxBot Prototype</title>
-  <style>
-    :root{
-      --bg:#0f1115;
-      --panel:#151924;
-      --text:#e9ecf1;
-      --muted:#a8b0bf;
-      --line:#2a3142;
-      --btn:#222a3a;
-      --btn2:#2b3550;
-      --danger:#ff4d4d;
-    }
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
-    body{margin:0;background:var(--bg);color:var(--text);}
+<meta charset="UTF-8">
+<title>Kippstich – BoxPot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    .wrap{max-width:980px;margin:0 auto;padding:18px;}
-    header{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;}
-    h1{margin:0;font-size:20px;letter-spacing:.2px;}
-    .sub{color:var(--muted);font-size:13px;margin-top:4px}
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#111;
+  color:#fff;
+  margin:0;
+  padding:16px;
+}
 
-    .row{display:grid;grid-template-columns: 1.2fr .8fr;gap:14px;margin-top:14px;}
-    @media (max-width:900px){ .row{grid-template-columns:1fr;} }
+h1 { text-align:center; }
 
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;}
-    .card h2{margin:0 0 10px 0;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.2px;}
-    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    button{
-      background:var(--btn);border:1px solid var(--line);color:var(--text);
-      border-radius:12px;padding:10px 12px;font-size:14px;cursor:pointer;
-    }
-    button:hover{background:var(--btn2);}
-    button:disabled{opacity:.5;cursor:not-allowed;}
-    .pill{padding:8px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-size:13px;}
+.section {
+  margin-bottom:20px;
+  padding:12px;
+  border:1px solid #333;
+  border-radius:8px;
+}
 
-    /* Play area */
-    .play-area{display:grid;grid-template-columns: 1fr;gap:14px;}
-    .stack-area{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
-    .stack-col{flex:1;min-width:280px;}
-    .stack-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-    .totals{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+button {
+  padding:10px 14px;
+  margin:4px;
+  font-size:16px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+}
 
-    /* Cards */
-    .stack{
-      position:relative;
-      min-height:190px;
-      border:1px dashed #2f3850;
-      border-radius:14px;
-      padding:12px;
-      overflow:hidden;
-      background:rgba(255,255,255,0.02);
-    }
-    .kcard{
-      width:120px;height:120px;border-radius:16px;
-      display:flex;align-items:center;justify-content:center;
-      position:absolute;
-      box-shadow:0 10px 22px rgba(0,0,0,.35);
-      border:2px solid rgba(0,0,0,.15);
-      user-select:none;
-    }
-    .knum{
-      font-size:54px;
-      font-weight:800;
-      color:#000; /* schwarze Ziffer wie gewünscht */
-      line-height:1;
-    }
-    .tag{
-      position:absolute;bottom:8px;left:10px;
-      font-size:12px;color:rgba(0,0,0,.6);
-      font-weight:700;letter-spacing:.4px;
-      text-transform:uppercase;
-    }
+button.primary { background:#444; color:white; }
+button.danger  { background:#900; color:white; }
 
-    /* Super card box */
-    .superBox{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      background:rgba(255,255,255,0.02);
-    }
-    .superHead{
-      display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
-    }
-    .xbtn{
-      width:38px;height:38px;border-radius:12px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,0.04);
-      display:flex;align-items:center;justify-content:center;
-      font-size:18px;color:var(--text);
-      cursor:pointer;
-    }
-    .xbtn:hover{border-color:var(--danger);color:var(--danger);}
-    .superHint{color:var(--muted);font-size:13px;margin:0 0 10px 0;}
-    .superCardWrap{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
-    .superCardWrap .kcard{position:relative;cursor:pointer;}
-    .superCardWrap .kcard:hover{transform:translateY(-2px);}
+.color-picker button {
+  width:60px;
+  height:40px;
+}
 
-    /* Number grid 1-12: 4 per row */
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap:10px;
-    }
-    .num{
-      background:#101421;border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px 0;
-      font-size:18px;
-      font-weight:800;
-      text-align:center;
-      cursor:pointer;
-      user-select:none;
-    }
-    .num:hover{background:#151c2c;}
-    .num:active{transform:translateY(1px);}
-    .small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
+.number-grid {
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:6px;
+}
 
-    /* End screen */
-    .overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,.7);
-      display:none;align-items:center;justify-content:center;padding:18px;
-    }
-    .modal{
-      max-width:520px;width:100%;
-      background:var(--panel);border:1px solid var(--line);border-radius:16px;
-      padding:18px;
-    }
-    .modal h3{margin:0 0 8px 0;}
-    .modal p{margin:0;color:var(--muted);line-height:1.4}
-  </style>
+.number-grid button {
+  background:#222;
+  color:white;
+}
+
+.card-area {
+  position:relative;
+  height:160px;
+  margin-top:10px;
+}
+
+.card {
+  width:90px;
+  height:120px;
+  border-radius:8px;
+  position:absolute;
+  top:0;
+  left:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  font-weight:bold;
+  color:black;
+  box-shadow:0 4px 8px rgba(0,0,0,0.5);
+}
+
+.supercard {
+  border:4px dashed black;
+}
+
+#boxpotValue {
+  font-size:20px;
+  margin-top:10px;
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Kippstich – BoxBot (Prototyp)</h1>
-        <div class="sub">Startkarte → Kippstiche → optional Superkipp → Punkte bis 140</div>
-      </div>
-      <div class="totals">
-        <div class="pill">BoxBot: <b id="boxSum">0</b></div>
-        <div class="pill">Gewonnene Punkte: <b id="score">0</b> / 140</div>
-      </div>
-    </header>
 
-    <div class="row">
-      <section class="card">
-        <h2>Aktionen</h2>
-        <div class="controls">
-          <button id="btnStart">Startkarte generieren</button>
-          <button id="btnSuper" disabled>Superkipp (Karte generieren)</button>
-          <button id="btnReset">Alles zurücksetzen</button>
-          <span class="pill" id="chainInfo">Kettenfarbe: –</span>
-        </div>
-        <div class="small">
-          <b>Kippstich:</b> Klick auf eine Zahl (1–12) → Karte in derselben Kettenfarbe wird in den BoxBot gelegt.<br>
-          <b>Superkipp:</b> erzeugt eine zusätzliche Karte in anderer Farbe. Klick auf die Superkippkarte = Erfolg (BoxBot als Punkte). ✕ = Misserfolg (unterste BoxBot-Karte entfernen).
-        </div>
-      </section>
+<h1>Kippstich – BoxPot</h1>
 
-      <section class="card">
-        <h2>Zahlenblock (1–12)</h2>
-        <div class="grid" id="numGrid"></div>
-        <div class="small">
-          Tipp: Hier klickst du den Wert an, mit dem du „drüber gestochen“ hast (Kippstich).
-        </div>
-      </section>
-    </div>
+<div class="section">
+  <h3>Startkarte</h3>
+  <button class="primary" onclick="generateStartCard()">🎲 Startkarte generieren</button>
+</div>
 
-    <div class="row">
-      <section class="card">
-        <h2>BoxBot (Kartenfächer)</h2>
-        <div class="stack-area">
-          <div class="stack-col">
-            <div class="stack-title">
-              <div class="pill">Karten im BoxBot: <b id="cardCount">0</b></div>
-              <div class="pill">Letzter Wert: <b id="lastVal">–</b></div>
-            </div>
-            <div class="stack" id="stack"></div>
-          </div>
-
-          <div class="stack-col">
-            <div class="stack-title">
-              <div class="pill">Superkipp</div>
-              <div class="pill">Status: <b id="superStatus">–</b></div>
-            </div>
-            <div class="superBox">
-              <div class="superHead">
-                <div class="superHint">Wenn eine Superkippkarte aktiv ist: Klick = Erfolg, ✕ = Misserfolg.</div>
-                <div class="xbtn" id="xFail" title="Superkipp verfehlt (unterste Karte entfernen)">✕</div>
-              </div>
-              <div class="superCardWrap" id="superWrap"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
+<div class="section">
+  <h3>Farbe wählen</h3>
+  <div class="color-picker">
+    <button style="background:#00A652" onclick="selectColor('gruen')"></button>
+    <button style="background:#F9961E" onclick="selectColor('orange')"></button>
+    <button style="background:#A41B85" onclick="selectColor('violett')"></button>
+    <button style="background:#006BB3" onclick="selectColor('blau')"></button>
   </div>
+</div>
 
-  <div class="overlay" id="overlay">
-    <div class="modal">
-      <h3>Spielende 🎯</h3>
-      <p>Du hast <b id="finalScore">140</b> Punkte erreicht. (Ziel: 140)</p>
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-        <button id="btnNewGame">Neues Spiel</button>
-      </div>
-    </div>
-  </div>
+<div class="section">
+  <h3>Zahl wählen</h3>
+  <div class="number-grid" id="numberGrid"></div>
+</div>
+
+<div class="section">
+  <button class="primary" onclick="setCard()">➕ Karte in BoxPot legen</button>
+  <button class="primary" onclick="superKipp()">⚡ Superkipp</button>
+  <button class="danger" onclick="superFail()">❌ Superkipp fehlgeschlagen</button>
+</div>
+
+<div class="section">
+  <h3>BoxPot</h3>
+  <div class="card-area" id="cardArea"></div>
+  <div id="boxpotValue">BoxPot: 0</div>
+</div>
 
 <script>
-  // Farben (deine fixierten RGBs)
-  const COLORS = [
-    { name: "Grün",    css: "rgb(0, 166, 82)" },
-    { name: "Orange",  css: "rgb(249, 150, 30)" }, // dein damaliges "Gelb" -> wirkt orange
-    { name: "Violett", css: "rgb(164, 27, 133)" },
-    { name: "Blau",    css: "rgb(0, 107, 179)" },
-  ];
+const COLORS = {
+  gruen:  "#00A652",
+  orange: "#F9961E",
+  violett:"#A41B85",
+  blau:   "#006BB3"
+};
 
-  const SCORE_TARGET = 140;
+let selectedColor = null;
+let selectedNumber = null;
+let boxpot = [];
 
-  // State
-  let chainColor = null;        // index in COLORS
-  let boxCards = [];            // [{value, colorIndex, type:'start'|'stich'|'super'}]
-  let score = 0;
+const numberGrid = document.getElementById("numberGrid");
+for (let i=1;i<=12;i++) {
+  const b = document.createElement("button");
+  b.textContent = i;
+  b.onclick = () => selectNumber(i);
+  numberGrid.appendChild(b);
+}
 
-  let superCard = null;         // {value, colorIndex} or null
+function selectColor(c) {
+  selectedColor = c;
+}
 
-  // DOM
-  const elBoxSum = document.getElementById("boxSum");
-  const elScore = document.getElementById("score");
-  const elChainInfo = document.getElementById("chainInfo");
+function selectNumber(n) {
+  selectedNumber = n;
+}
 
-  const elStack = document.getElementById("stack");
-  const elCount = document.getElementById("cardCount");
-  const elLastVal = document.getElementById("lastVal");
+function generateStartCard() {
+  const colors = Object.keys(COLORS);
+  selectedColor = colors[Math.floor(Math.random()*4)];
+  selectedNumber = Math.floor(Math.random()*12)+1;
+  setCard();
+}
 
-  const btnStart = document.getElementById("btnStart");
-  const btnSuper = document.getElementById("btnSuper");
-  const btnReset = document.getElementById("btnReset");
+function setCard() {
+  if (!selectedColor || !selectedNumber) return;
+  boxpot.push({color:selectedColor, number:selectedNumber});
+  render();
+}
 
-  const elSuperWrap = document.getElementById("superWrap");
-  const elSuperStatus = document.getElementById("superStatus");
-  const xFail = document.getElementById("xFail");
+function superKipp() {
+  const colors = Object.keys(COLORS);
+  const c = colors[Math.floor(Math.random()*4)];
+  const n = Math.floor(Math.random()*12)+1;
+  boxpot.push({color:c, number:n, super:true});
+  render();
+}
 
-  const overlay = document.getElementById("overlay");
-  const finalScore = document.getElementById("finalScore");
-  const btnNewGame = document.getElementById("btnNewGame");
+function superFail() {
+  if (boxpot.length > 0) {
+    boxpot.shift();
+    render();
+  }
+}
 
-  // Build number grid (1..12)
-  const grid = document.getElementById("numGrid");
-  for(let i=1;i<=12;i++){
+function render() {
+  const area = document.getElementById("cardArea");
+  area.innerHTML = "";
+  let sum = 0;
+
+  boxpot.forEach((c,i) => {
+    sum += c.number;
     const d = document.createElement("div");
-    d.className = "num";
-    d.textContent = i;
-    d.addEventListener("click", ()=> onNumberClick(i));
-    grid.appendChild(d);
-  }
-
-  function randInt(min, max){
-    return Math.floor(Math.random()*(max-min+1))+min;
-  }
-  function pickRandomColorIndex(excludeIndex=null){
-    const options = COLORS.map((_,i)=>i).filter(i=>i!==excludeIndex);
-    return options[randInt(0, options.length-1)];
-  }
-
-  function boxSum(){
-    return boxCards.reduce((a,c)=>a+c.value,0);
-  }
-
-  function updateUI(){
-    elBoxSum.textContent = boxSum();
-    elScore.textContent = score;
-    elCount.textContent = boxCards.length;
-    elLastVal.textContent = boxCards.length ? boxCards[boxCards.length-1].value : "–";
-    elChainInfo.innerHTML = `Kettenfarbe: <b>${chainColor===null ? "–" : COLORS[chainColor].name}</b>`;
-
-    // Enable rules
-    btnSuper.disabled = (chainColor===null || boxCards.length===0 || superCard!==null);
-
-    // Render stack
-    elStack.innerHTML = "";
-    const baseX = 10, baseY = 10;
-    const dx = 14, dy = 14; // fächer
-    const maxShow = 9; // optisch
-    const startIdx = Math.max(0, boxCards.length - maxShow);
-
-    for(let i=startIdx;i<boxCards.length;i++){
-      const c = boxCards[i];
-      const k = document.createElement("div");
-      k.className = "kcard";
-      k.style.background = COLORS[c.colorIndex].css;
-      const pos = i - startIdx;
-      k.style.left = (baseX + pos*dx) + "px";
-      k.style.top  = (baseY + pos*dy) + "px";
-
-      const num = document.createElement("div");
-      num.className = "knum";
-      num.textContent = c.value;
-
-      const tag = document.createElement("div");
-      tag.className = "tag";
-      tag.textContent = c.type === "start" ? "Start" : (c.type === "super" ? "Super" : "Stich");
-
-      k.appendChild(num);
-      k.appendChild(tag);
-      elStack.appendChild(k);
-    }
-
-    // Render super card
-    elSuperWrap.innerHTML = "";
-    if(superCard){
-      elSuperStatus.textContent = "aktiv";
-      const k = document.createElement("div");
-      k.className = "kcard";
-      k.style.background = COLORS[superCard.colorIndex].css;
-
-      const num = document.createElement("div");
-      num.className = "knum";
-      num.textContent = superCard.value;
-
-      const tag = document.createElement("div");
-      tag.className = "tag";
-      tag.textContent = "Superkipp";
-
-      k.appendChild(num);
-      k.appendChild(tag);
-
-      // Erfolg: Klick auf Karte
-      k.addEventListener("click", ()=> superSuccess());
-
-      elSuperWrap.appendChild(k);
-    }else{
-      elSuperStatus.textContent = "–";
-    }
-
-    // End check
-    if(score >= SCORE_TARGET){
-      finalScore.textContent = score;
-      overlay.style.display = "flex";
-      // disable controls while ended
-      btnStart.disabled = true;
-      btnSuper.disabled = true;
-    }else{
-      overlay.style.display = "none";
-      btnStart.disabled = false;
-    }
-  }
-
-  function resetAll(){
-    chainColor = null;
-    boxCards = [];
-    superCard = null;
-    score = 0;
-    updateUI();
-  }
-
-  // Start card: random color + random value
-  function generateStartCard(){
-    const colorIndex = pickRandomColorIndex(null);
-    const value = randInt(1,12);
-    chainColor = colorIndex;
-    boxCards = [{ value, colorIndex, type: "start" }];
-    superCard = null;
-    updateUI();
-  }
-
-  function onNumberClick(value){
-    // If no start card yet -> ignore
-    if(chainColor===null || boxCards.length===0) return;
-
-    // In this prototype: number click always adds a "stich" card in chainColor
-    boxCards.push({ value, colorIndex: chainColor, type: "stich" });
-    updateUI();
-  }
-
-  function generateSuperCard(){
-    if(chainColor===null || boxCards.length===0) return;
-    // Super card must be in another color than chainColor (as per your rule)
-    const colorIndex = pickRandomColorIndex(chainColor);
-    const value = randInt(1,12);
-    superCard = { value, colorIndex };
-    updateUI();
-  }
-
-  function superSuccess(){
-    if(!superCard) return;
-
-    // Super card counts into BoxBot (as you requested)
-    boxCards.push({ value: superCard.value, colorIndex: superCard.colorIndex, type: "super" });
-
-    // BoxBot is "won points" when Superkipp succeeds
-    const won = boxSum();
-    score += won;
-
-    // Reset for new round (new start card possible)
-    chainColor = null;
-    boxCards = [];
-    superCard = null;
-
-    updateUI();
-    alert(`Superkipp gelungen! +${won} Punkte`);
-  }
-
-  function superFail(){
-    if(!superCard) return;
-
-    // Super card disappears
-    superCard = null;
-
-    // Remove the bottom (first) card from your own BoxBot
-    if(boxCards.length > 1){
-      boxCards.shift();
-    }else{
-      // if only one card -> no penalty
-    }
-
-    updateUI();
-  }
-
-  // Wire buttons
-  btnStart.addEventListener("click", generateStartCard);
-  btnSuper.addEventListener("click", generateSuperCard);
-  btnReset.addEventListener("click", resetAll);
-  xFail.addEventListener("click", superFail);
-
-  btnNewGame.addEventListener("click", ()=>{
-    resetAll();
-    overlay.style.display = "none";
+    d.className = "card" + (c.super ? " supercard" : "");
+    d.style.background = COLORS[c.color];
+    d.style.left = (i*18)+"px";
+    d.textContent = c.number;
+    area.appendChild(d);
   });
 
-  // init
-  updateUI();
+  document.getElementById("boxpotValue").textContent =
+    "BoxPot: " + sum;
+}
 </script>
+
 </body>
 </html>
