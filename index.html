@@ -3,68 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kippstich – Test-App (A–D)</title>
+  <title>KIPPstich – 1 Spieler</title>
   <style>
     :root{
       --bg:#0f1115;
       --panel:#151925;
       --text:#e8edf6;
-      --muted:#aeb7c6;
+      --muted:#b7c0cf;
       --outline:rgba(255,255,255,.14);
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 18px;
+      --radius:18px;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 700px at 30% 10%, #1b2140 0%, var(--bg) 55%);
+      background: radial-gradient(1200px 700px at 30% 10%, #1b2140 0%, var(--bg) 58%);
       color:var(--text);
       min-height:100svh;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:18px;
+      padding:16px;
     }
     .app{
-      width:min(720px, 100%);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      width:min(520px, 100%);
       border:1px solid var(--outline);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:18px;
+      border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      padding:16px;
     }
-    .topbar{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      justify-content:space-between;
-      flex-wrap:wrap;
-      margin-bottom:14px;
-    }
+
+    /* Titel */
     .title{
+      text-align:center;
+      margin:4px 0 12px;
+      user-select:none;
+    }
+    .title .kipp{
+      font-weight:1000;
+      letter-spacing:2px;
+      font-size:34px;
+      text-transform:uppercase;
+      line-height:1;
+      display:inline-block;
+    }
+    .title .stich{
+      font-weight:900;
+      letter-spacing:.3px;
+      font-size:30px;
+      margin-left:6px;
+      line-height:1;
+      display:inline-block;
+    }
+
+    /* Statuszeile */
+    .status{
       display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .title h1{
-      font-size:18px;
-      margin:0;
-      letter-spacing:.2px;
-    }
-    .title p{
-      margin:0;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-      max-width:520px;
-    }
-    .controls{
-      display:flex;
+      justify-content:space-between;
       gap:10px;
       align-items:center;
       flex-wrap:wrap;
+      margin-bottom:12px;
+      color:var(--muted);
+      font-size:13px;
     }
+    .pill{
+      border:1px solid var(--outline);
+      background: rgba(255,255,255,.04);
+      padding:8px 10px;
+      border-radius:999px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+    }
+    .pill b{ color:var(--text); }
+
     button{
       border:1px solid var(--outline);
       background: rgba(255,255,255,.06);
@@ -72,327 +86,253 @@
       padding:10px 12px;
       border-radius:14px;
       cursor:pointer;
-      font-weight:600;
+      font-weight:800;
     }
     button:hover{ background: rgba(255,255,255,.10); }
-    .hint{
-      font-size:12px;
-      color:var(--muted);
-    }
 
-    .labels{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap:12px;
-      margin:10px 0 10px;
-    }
-    .label{
-      text-align:center;
-      font-weight:800;
-      letter-spacing:2px;
-      color: rgba(255,255,255,.85);
-      font-size:14px;
-    }
-
-    .cards{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap:12px;
-      margin-bottom:16px;
+    /* Kärtchen */
+    .cardWrap{
+      width:100%;
+      margin-bottom:14px;
     }
     .card{
-      position:relative;
-      aspect-ratio: 1 / 1;
-      border-radius: 18px;
-      border: 2px solid rgba(255,255,255,.22);
-      box-shadow: 0 12px 25px rgba(0,0,0,.25);
-      cursor:pointer;
+      width:100%;
+      aspect-ratio: 1 / 1;          /* quadratisch, volle Breite */
+      border-radius:22px;
+      border:2px solid rgba(255,255,255,.22);
+      box-shadow: 0 14px 28px rgba(0,0,0,.30);
       display:flex;
       align-items:center;
       justify-content:center;
+      position:relative;
+      cursor:pointer;
       user-select:none;
       overflow:hidden;
-      transform: translateZ(0);
     }
     .card::after{
       content:"";
       position:absolute;
-      inset:-40%;
-      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.26), rgba(255,255,255,0) 55%);
+      inset:-45%;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.28), rgba(255,255,255,0) 55%);
       transform: rotate(15deg);
       pointer-events:none;
     }
-    .card.active{
-      outline: 4px solid rgba(255,255,255,.65);
-      outline-offset: 2px;
-    }
-    .num{
+    .cardNum{
       position:relative;
       z-index:2;
-      font-size: 54px;
-      font-weight: 900;
+      font-size:84px;              /* schön groß */
+      font-weight:1000;
       color:#000;
-      text-shadow: 0 2px 0 rgba(255,255,255,.25);
       line-height:1;
+      text-shadow: 0 2px 0 rgba(255,255,255,.25);
     }
-    .subrow{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      margin-top:10px;
-      flex-wrap:wrap;
+    .cardEmptyHint{
+      position:absolute;
+      bottom:12px;
+      left:12px;
+      right:12px;
+      z-index:2;
+      font-size:13px;
+      color: rgba(0,0,0,.70);
+      font-weight:800;
+      text-align:center;
     }
-    .pill{
-      border:1px solid var(--outline);
-      background: rgba(255,255,255,.04);
-      padding:8px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-      color: var(--muted);
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .pill b{ color: var(--text); }
 
-    .grid-wrap{
-      margin-top:14px;
+    /* Zahlenblock */
+    .panel{
+      border:1px solid var(--outline);
+      border-radius:var(--radius);
       background: rgba(0,0,0,.18);
-      border: 1px solid var(--outline);
-      border-radius: var(--radius);
-      padding: 14px;
+      padding:12px;
     }
-    .grid-title{
+    .panelHeader{
       display:flex;
-      align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
+      align-items:flex-end;
       flex-wrap:wrap;
       margin-bottom:10px;
     }
-    .grid-title h2{
+    .panelHeader h2{
       margin:0;
       font-size:14px;
       letter-spacing:.2px;
     }
-    .grid-title .small{
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
+    .panelHeader .small{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.3;
     }
 
     .numbers{
       display:grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, 1fr); /* 4 pro Zeile */
       gap:10px;
     }
     .nbtn{
-      border-radius: 16px;
-      padding: 14px 0;
-      text-align:center;
-      font-size: 18px;
-      font-weight: 900;
-      border: 1px solid var(--outline);
+      border:1px solid var(--outline);
       background: rgba(255,255,255,.06);
+      border-radius:16px;
       cursor:pointer;
       user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      /* „höher als breit“ */
+      height:56px;
+      font-weight:1000;
+      font-size:22px;
+      color:var(--text);
     }
     .nbtn:hover{ background: rgba(255,255,255,.12); }
     .nbtn:active{ transform: scale(.985); }
 
-    .footer{
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
-    }
-
-    .win{
+    .done{
       margin-top:12px;
       padding:10px 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(0,255,170,.35);
+      border-radius:16px;
+      border:1px solid rgba(0,255,170,.35);
       background: rgba(0,255,170,.08);
       color: rgba(220,255,245,.95);
-      font-weight: 800;
+      font-weight:900;
       display:none;
     }
-    .win.show{ display:block; }
+    .done.show{ display:block; }
   </style>
 </head>
+
 <body>
   <div class="app">
-    <div class="topbar">
-      <div class="title">
-        <h1>Kippstich – Test-App (A–D)</h1>
-        <p>
-          Tippe zuerst dein Quadrat (A–D), dann die Zahl vom Würfel an deiner Farbe.
-          Die App zeigt automatisch <b>+1</b> (12→1). Bei Treffer: Tippe dein Quadrat, neue Farbe kommt.
-          Wer <b>4 Treffer</b> hat, gewinnt.
-        </p>
-      </div>
-      <div class="controls">
-        <button id="btnNew">Neues Spiel</button>
+    <div class="title" aria-label="Titel">
+      <span class="kipp">KIPP</span><span class="stich">stich</span>
+    </div>
+
+    <div class="status">
+      <div class="pill">Status: <b id="remainingTxt">Noch 4 Kärtchen</b></div>
+      <button id="btnNew">Neues Spiel</button>
+    </div>
+
+    <div class="cardWrap">
+      <div class="card" id="card" title="Zahl wählen → wird als +1 angezeigt. Dann auf die Karte tippen = Kärtchen erledigt.">
+        <div class="cardNum" id="cardNum"></div>
+        <div class="cardEmptyHint" id="cardHint">Zahl antippen (1–12) → +1 erscheint</div>
       </div>
     </div>
 
-    <div class="labels" aria-label="Spielerlabels">
-      <div class="label">A</div>
-      <div class="label">B</div>
-      <div class="label">C</div>
-      <div class="label">D</div>
-    </div>
-
-    <div class="cards" id="cards" aria-label="Farbquadrate">
-      <!-- injected -->
-    </div>
-
-    <div class="subrow">
-      <div class="pill">Ausgewählt: <b id="selName">—</b></div>
-      <div class="pill">Treffer A/B/C/D: <b id="scores">0 / 0 / 0 / 0</b></div>
-    </div>
-
-    <div class="grid-wrap">
-      <div class="grid-title">
-        <h2>Zahlenblock (tippe die Zahl am Würfel an deiner Farbe)</h2>
-        <div class="small">Ergebnis im Quadrat ist automatisch <b>+1</b> (12→1).</div>
+    <div class="panel">
+      <div class="panelHeader">
+        <h2>Zahlenblock</h2>
+        <div class="small">Du tippst die Zahl an deiner Farbe – im Kärtchen steht automatisch <b>+1</b> (12→1).</div>
       </div>
 
-      <div class="numbers" id="numbers" aria-label="Zahlenblock 1 bis 12">
-        <!-- injected -->
-      </div>
+      <div class="numbers" id="numbers"></div>
 
-      <div class="footer">
-        Tipp: Wenn ein anderer aus Versehen deine Zahl „wegkippt“, tippst du einfach dein eigenes Quadrat (wie bei eigenem Treffer).
-      </div>
-
-      <div class="win" id="winBox"></div>
+      <div class="done" id="doneBox">✅ Fertig! Keine Kärtchen mehr. Drück „Neues Spiel“.</div>
     </div>
   </div>
 
 <script>
-  // Deine Spielerfarben (RGB) aus deinem Setup:
+  // Deine LENNOY-Farben (RGB) – passend zu deinem Setup
   const COLORS = [
+    { name: "Grün",    rgb: "rgb(0,166,82)" },
     { name: "Violett", rgb: "rgb(164,27,133)" },
     { name: "Blau",    rgb: "rgb(0,107,179)" },
-    { name: "Grün",    rgb: "rgb(0,166,82)" },
     { name: "Orange",  rgb: "rgb(249,150,30)" },
   ];
 
-  const PLAYERS = ["A","B","C","D"];
-  const WIN_TARGET = 4;
+  const WIN_TARGET = 4;         // 4x Karte wegklicken = fertig
+  let cleared = 0;              // wie oft du die Karte „erledigt“ hast
+  let currentColor = 0;         // index in COLORS
+  let shownNum = null;          // Zahl, die aktuell im Kärtchen steht (nach +1)
+  let isFinished = false;
 
-  // State
-  let selected = null; // index 0..3
-  let cards = [];      // [{colorIndex, displayNum|null}]
-  let scores = [0,0,0,0];
-
-  const elCards = document.getElementById("cards");
+  const elCard = document.getElementById("card");
+  const elCardNum = document.getElementById("cardNum");
+  const elCardHint = document.getElementById("cardHint");
+  const elRemainingTxt = document.getElementById("remainingTxt");
   const elNumbers = document.getElementById("numbers");
-  const elSelName = document.getElementById("selName");
-  const elScores = document.getElementById("scores");
-  const elWinBox = document.getElementById("winBox");
+  const elDoneBox = document.getElementById("doneBox");
 
   function randInt(max){ return Math.floor(Math.random()*max); }
 
   function plusOneWrap(n){
-    // n in 1..12
     return (n === 12) ? 1 : (n + 1);
   }
 
-  function newRandomCard(){
-    return { colorIndex: randInt(COLORS.length), displayNum: null };
+  function setCardColor(idx){
+    currentColor = idx;
+    elCard.style.background = COLORS[idx].rgb;
+  }
+
+  function updateRemaining(){
+    const remaining = Math.max(0, WIN_TARGET - cleared);
+    if(remaining === 1) elRemainingTxt.textContent = "Noch 1 Kärtchen";
+    else elRemainingTxt.textContent = `Noch ${remaining} Kärtchen`;
+  }
+
+  function setFinished(flag){
+    isFinished = flag;
+    elDoneBox.classList.toggle("show", flag);
+    if(flag){
+      elCardNum.textContent = "";
+      elCardHint.textContent = "Fertig – Neues Spiel starten";
+    }
+  }
+
+  function newEmptyCard(){
+    shownNum = null;
+    elCardNum.textContent = "";
+    elCardHint.textContent = "Zahl antippen (1–12) → +1 erscheint";
+    setCardColor(randInt(COLORS.length));
   }
 
   function resetGame(){
-    selected = null;
-    scores = [0,0,0,0];
-    cards = [newRandomCard(), newRandomCard(), newRandomCard(), newRandomCard()];
-    render();
-    setWin(null);
+    cleared = 0;
+    updateRemaining();
+    setFinished(false);
+    newEmptyCard();
   }
 
-  function setWin(text){
-    if(!text){
-      elWinBox.classList.remove("show");
-      elWinBox.textContent = "";
-      return;
-    }
-    elWinBox.textContent = text;
-    elWinBox.classList.add("show");
-  }
-
-  function render(){
-    // cards
-    elCards.innerHTML = "";
-    cards.forEach((c, idx) => {
-      const div = document.createElement("div");
-      div.className = "card" + (selected === idx ? " active" : "");
-      div.style.background = COLORS[c.colorIndex].rgb;
-      div.title = `Spieler ${PLAYERS[idx]} – ${COLORS[c.colorIndex].name}`;
-
-      const num = document.createElement("div");
-      num.className = "num";
-      num.textContent = (c.displayNum == null) ? "" : String(c.displayNum);
-
-      div.appendChild(num);
-
-      // Click = select OR if number shown => treat as "Treffer / wegklicken"
-      div.addEventListener("click", () => {
-        // Wenn schon Gewinner da ist, trotzdem noch auswählbar? -> blockieren:
-        if (Math.max(...scores) >= WIN_TARGET) return;
-
-        // Wenn Zahl drinsteht: als Treffer werten, neue Farbe ohne Zahl
-        if(cards[idx].displayNum != null){
-          scores[idx] += 1;
-          cards[idx] = newRandomCard(); // neue Farbe, keine Zahl
-          selected = null; // nach Treffer Auswahl löschen (du regelst Reihenfolge selbst)
-          render();
-          updateMeta();
-
-          if(scores[idx] >= WIN_TARGET){
-            setWin(`✅ Spieler ${PLAYERS[idx]} gewinnt mit ${WIN_TARGET} Treffern!`);
-          }
-          return;
-        }
-
-        // sonst nur auswählen
-        selected = idx;
-        render();
-        updateMeta();
-      });
-
-      elCards.appendChild(div);
-    });
-
-    updateMeta();
-  }
-
-  function updateMeta(){
-    elSelName.textContent = (selected == null) ? "—" : `Spieler ${PLAYERS[selected]} (${COLORS[cards[selected].colorIndex].name})`;
-    elScores.textContent = `${scores[0]} / ${scores[1]} / ${scores[2]} / ${scores[3]}`;
-  }
-
+  // Zahlenblock bauen
   function buildNumbers(){
     elNumbers.innerHTML = "";
     for(let n=1; n<=12; n++){
-      const b = document.createElement("div");
-      b.className = "nbtn";
-      b.textContent = n;
+      const btn = document.createElement("div");
+      btn.className = "nbtn";
+      btn.textContent = n;
 
-      b.addEventListener("click", () => {
-        if (Math.max(...scores) >= WIN_TARGET) return;
-        if (selected == null) return; // erst Spieler wählen
+      btn.addEventListener("click", () => {
+        if(isFinished) return;
 
-        // Du klickst die Zahl, die an deiner Farbe liegt -> App zeigt +1
-        const shown = plusOneWrap(n);
-        cards[selected].displayNum = shown;
-        render();
+        // Zahl angetippt -> im Kärtchen +1 anzeigen
+        shownNum = plusOneWrap(n);
+        elCardNum.textContent = String(shownNum);
+        elCardHint.textContent = "Wenn du erfolgreich gekippt hast: auf die Karte tippen";
       });
 
-      elNumbers.appendChild(b);
+      elNumbers.appendChild(btn);
     }
   }
+
+  // Auf Karte tippen = „Kärtchen erledigt“ (egal ob du es selbst oder ein anderer „weggekippte“)
+  elCard.addEventListener("click", () => {
+    if(isFinished) return;
+
+    // nur wenn eine Zahl angezeigt wird (sonst wäre es ein Leerklick)
+    if(shownNum == null) return;
+
+    cleared += 1;
+    updateRemaining();
+
+    if(cleared >= WIN_TARGET){
+      setFinished(true);
+      return;
+    }
+
+    // nächstes leeres Kärtchen
+    newEmptyCard();
+  });
 
   document.getElementById("btnNew").addEventListener("click", resetGame);
 
@@ -400,4 +340,4 @@
   resetGame();
 </script>
 </body>
-      </html>
+</html>
