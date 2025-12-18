@@ -3,33 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KippStich</title>
+<title>KIPPStich</title>
 
 <style>
 :root{
-  --wood:#9a6845;
-  --wood-dark:#7f5538;
+  --wood-bg:#b07a52;      /* dunklerer Holzton */
+  --wood-bg-dark:#9a6845;
   --bamboo:#d6c3a0;
   --tile:#efe6d2;
   --ink:#111;
+
+  --green:#00a652;
+  --violet:#a41b85;
+  --blue:#006bb3;
+  --orange:#f9961e;
+}
+
+*{
+  box-sizing:border-box;
+  touch-action:manipulation;
 }
 
 html,body{
   margin:0;
+  padding:0;
   width:100%;
   height:100%;
-  background:var(--wood);
-  font-family:system-ui, sans-serif;
+  overflow:hidden;              /* 🔒 kein Scrollen */
+  background:var(--wood-bg-dark);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
+/* Fixierte Spielfläche */
 .stage{
   width:100%;
   height:100%;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
+  background:linear-gradient(
+    180deg,
+    var(--wood-bg),
+    var(--wood-bg-dark)
+  );
 }
 
+/* Spielbrett */
 .app{
   width:100%;
   max-width:420px;
@@ -38,21 +57,28 @@ html,body{
   padding:16px;
   display:flex;
   flex-direction:column;
+  justify-content:flex-start;
 }
 
+/* Titel */
 h1{
   margin:10px 0 12px;
   text-align:center;
-  font-size:30px;
+  font-size:28px;
   font-weight:800;
+  letter-spacing:1px;
 }
+h1 span{font-weight:500}
 
+/* Kartenrahmen */
 .card-frame{
   background:var(--bamboo);
   padding:14px;
   border-radius:18px;
+  margin-bottom:10px;
 }
 
+/* Karte */
 .card{
   width:100%;
   aspect-ratio:1/1;
@@ -60,24 +86,32 @@ h1{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:140px;
+  font-size:140px;   /* Zahl größer */
   font-weight:800;
   color:#000;
+  user-select:none;
+  position:relative; /* für Text unten */
+}
+
+/* Info IN der Karte (damit nichts “rutscht”) */
+.card .in-card-info{
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:10px;
+  text-align:center;
+  font-size:18px;
+  font-weight:800;
+  opacity:.9;
 }
 
 .card.empty{
-  background:var(--wood-dark);
+  background:var(--wood-bg-dark);
   color:#fff;
-  font-size:26px;
+  font-size:24px;
 }
 
-.status{
-  height:24px;
-  text-align:center;
-  margin:8px 0;
-  font-weight:600;
-}
-
+/* Reset */
 .reset-btn{
   width:100%;
   padding:10px;
@@ -89,6 +123,7 @@ h1{
   margin-bottom:10px;
 }
 
+/* Zahlenblock */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -98,42 +133,51 @@ h1{
 .num{
   background:var(--tile);
   border-radius:10px;
-  padding:20px 0;
-  font-size:24px;
+  padding:18px 0;     /* hochformatiger */
+  font-size:22px;
   font-weight:700;
   text-align:center;
+  user-select:none;
+}
+
+.num:active{
+  transform:scale(0.95);
 }
 </style>
 </head>
 
 <body>
 <div class="stage">
-<div class="app">
+  <div class="app">
 
-<h1>KippStich</h1>
+    <h1>KIPP<span>Stich</span></h1>
 
-<div class="card-frame">
-  <div id="card" class="card"></div>
-  <div id="status" class="status"></div>
-</div>
+    <div class="card-frame">
+      <div id="card" class="card"></div>
+    </div>
 
-<button id="resetBtn" class="reset-btn">Reset Zahl</button>
+    <button id="resetBtn" class="reset-btn" onclick="resetOnlyNumber()">Reset</button>
 
-<div class="grid" id="numbers"></div>
+    <div class="grid" id="numbers"></div>
 
-</div>
+  </div>
 </div>
 
 <script>
-const colors=["#00a652","#a41b85","#006bb3","#f9961e"];
-let remaining=4;
-let currentValue=null;
-let currentColor=null;
+const colors = [
+  {val:"#00a652"},
+  {val:"#a41b85"},
+  {val:"#006bb3"},
+  {val:"#f9961e"}
+];
 
-const card=document.getElementById("card");
-const status=document.getElementById("status");
-const resetBtn=document.getElementById("resetBtn");
-const numbers=document.getElementById("numbers");
+let remaining = 4;
+let currentValue = null;
+let currentColor = null;
+
+const card = document.getElementById("card");
+const numbers = document.getElementById("numbers");
+const resetBtn = document.getElementById("resetBtn");
 
 for(let i=1;i<=12;i++){
   const d=document.createElement("div");
@@ -143,54 +187,80 @@ for(let i=1;i<=12;i++){
   numbers.appendChild(d);
 }
 
-function nextValue(n){
-  return n===12 ? 1 : n+1;
+function setCardVisual(bg, mainText, infoText){
+  card.className = "card";
+  card.style.background = bg;
+  card.innerHTML = "";
+
+  const main = document.createElement("div");
+  main.textContent = mainText || "";
+  card.appendChild(main);
+
+  const info = document.createElement("div");
+  info.className = "in-card-info";
+  info.textContent = infoText || "";
+  card.appendChild(info);
+}
+
+function showWinState(){
+  card.className="card empty";
+  card.style.background = getComputedStyle(document.documentElement).getPropertyValue("--wood-bg-dark");
+  card.innerHTML = "<div style='font-weight:900; letter-spacing:1px;'>GEWONNEN</div>";
+  resetBtn.textContent = "Neues Spiel";
 }
 
 function newCard(){
   if(remaining<=0){
-    card.className="card empty";
-    card.textContent="GEWONNEN";
-    status.textContent="";
-    resetBtn.textContent="Neues Spiel";
-    resetBtn.onclick=startGame;
+    showWinState();
     return;
   }
-  currentColor=colors[Math.floor(Math.random()*colors.length)];
-  card.className="card";
-  card.style.background=currentColor;
-  card.textContent="";
-  currentValue=null;
-  status.textContent=`Noch ${remaining} Kärtchen`;
+
+  // Farbe neu (wie gehabt)
+  currentColor = colors[Math.floor(Math.random()*colors.length)].val;
+
+  // leere Karte, Zahl weg
+  currentValue = null;
+
+  setCardVisual(currentColor, "", `Noch ${remaining} Kärtchen`);
+  resetBtn.textContent = "Reset";
+}
+
+function cyclicPlusOne(n){
+  // 12 -> 1, sonst +1
+  return (n % 12) + 1;
 }
 
 function pickNumber(n){
-  if(currentValue!==null || remaining<=0) return;
-  currentValue=nextValue(n);
-  card.textContent=currentValue;
+  if(currentValue !== null || remaining <= 0) return;
+
+  currentValue = cyclicPlusOne(n);
+  setCardVisual(currentColor, String(currentValue), `Noch ${remaining} Kärtchen`);
 }
 
-card.onclick=()=>{
-  if(currentValue===null || remaining<=0) return;
+// Klick auf Karte = “abspielen”
+card.onclick = () => {
+  if(currentValue === null || remaining <= 0) return;
   remaining--;
   newCard();
 };
 
-function resetNumber(){
-  if(currentValue===null || remaining<=0) return;
-  currentValue=null;
-  card.textContent="";
+// Reset: NUR Zahl löschen, Farbe bleibt
+function resetOnlyNumber(){
+  if(remaining <= 0){
+    // Neues Spiel
+    remaining = 4;
+    currentColor = null;
+    currentValue = null;
+    newCard();
+    return;
+  }
+
+  currentValue = null;
+  // gleiche Farbe behalten
+  setCardVisual(currentColor, "", `Noch ${remaining} Kärtchen`);
 }
 
-function startGame(){
-  remaining=4;
-  resetBtn.textContent="Reset Zahl";
-  resetBtn.onclick=resetNumber;
-  newCard();
-}
-
-resetBtn.onclick=resetNumber;
-startGame();
+newCard();
 </script>
 
 </body>
