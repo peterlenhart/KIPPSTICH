@@ -7,7 +7,7 @@
 
 <style>
 :root{
-  --wood-bg:#b07a52;      /* dunklerer Holzton */
+  --wood-bg:#b07a52;
   --wood-bg-dark:#9a6845;
   --bamboo:#d6c3a0;
   --tile:#efe6d2;
@@ -29,12 +29,11 @@ html,body{
   padding:0;
   width:100%;
   height:100%;
-  overflow:hidden;              /* 🔒 kein Scrollen */
+  overflow:hidden;
   background:var(--wood-bg-dark);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* Fixierte Spielfläche */
 .stage{
   width:100%;
   height:100%;
@@ -48,7 +47,6 @@ html,body{
   );
 }
 
-/* Spielbrett */
 .app{
   width:100%;
   max-width:420px;
@@ -57,10 +55,8 @@ html,body{
   padding:16px;
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
 }
 
-/* Titel */
 h1{
   margin:10px 0 12px;
   text-align:center;
@@ -70,7 +66,6 @@ h1{
 }
 h1 span{font-weight:500}
 
-/* Kartenrahmen */
 .card-frame{
   background:var(--bamboo);
   padding:14px;
@@ -78,7 +73,6 @@ h1 span{font-weight:500}
   margin-bottom:10px;
 }
 
-/* Karte */
 .card{
   width:100%;
   aspect-ratio:1/1;
@@ -86,7 +80,7 @@ h1 span{font-weight:500}
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:120px;
+  font-size:140px;
   font-weight:800;
   color:#000;
   user-select:none;
@@ -98,14 +92,12 @@ h1 span{font-weight:500}
   font-size:24px;
 }
 
-/* Status */
 .status{
   text-align:center;
   margin:8px 0;
   font-weight:600;
 }
 
-/* Reset */
 .reset-btn{
   width:100%;
   padding:10px;
@@ -117,7 +109,6 @@ h1 span{font-weight:500}
   margin-bottom:10px;
 }
 
-/* Zahlenblock */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -127,8 +118,8 @@ h1 span{font-weight:500}
 .num{
   background:var(--tile);
   border-radius:10px;
-  padding:18px 0;     /* 🔼 hochformatiger */
-  font-size:22px;
+  padding:20px 0;
+  font-size:24px;
   font-weight:700;
   text-align:center;
   user-select:none;
@@ -209,9 +200,11 @@ card.onclick=()=>{
   newCard();
 };
 
+/* ✅ RESET: löscht NUR die Zahl */
 function resetGame(){
-  remaining=4;
-  newCard();
+  if(currentValue===null) return;
+  currentValue=null;
+  card.textContent="";
 }
 
 newCard();
