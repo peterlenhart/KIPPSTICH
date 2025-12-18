@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KIPPstich – 1 Spieler</title>
+  <title>KIPPStich – 1 Spieler</title>
   <style>
     :root{
       --bg:#0f1115;
-      --panel:#151925;
       --text:#e8edf6;
       --muted:#b7c0cf;
       --outline:rgba(255,255,255,.14);
@@ -86,7 +85,7 @@
       padding:10px 12px;
       border-radius:14px;
       cursor:pointer;
-      font-weight:800;
+      font-weight:900;
     }
     button:hover{ background: rgba(255,255,255,.10); }
 
@@ -97,7 +96,7 @@
     }
     .card{
       width:100%;
-      aspect-ratio: 1 / 1;          /* quadratisch, volle Breite */
+      aspect-ratio: 1 / 1;
       border-radius:22px;
       border:2px solid rgba(255,255,255,.22);
       box-shadow: 0 14px 28px rgba(0,0,0,.30);
@@ -120,7 +119,7 @@
     .cardNum{
       position:relative;
       z-index:2;
-      font-size:84px;              /* schön groß */
+      font-size:84px;
       font-weight:1000;
       color:#000;
       line-height:1;
@@ -134,7 +133,7 @@
       z-index:2;
       font-size:13px;
       color: rgba(0,0,0,.70);
-      font-weight:800;
+      font-weight:900;
       text-align:center;
     }
 
@@ -145,28 +144,15 @@
       background: rgba(0,0,0,.18);
       padding:12px;
     }
-    .panelHeader{
+    .panelTop{
       display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-end;
-      flex-wrap:wrap;
+      justify-content:flex-end;
       margin-bottom:10px;
-    }
-    .panelHeader h2{
-      margin:0;
-      font-size:14px;
-      letter-spacing:.2px;
-    }
-    .panelHeader .small{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.3;
     }
 
     .numbers{
       display:grid;
-      grid-template-columns: repeat(4, 1fr); /* 4 pro Zeile */
+      grid-template-columns: repeat(4, 1fr);
       gap:10px;
     }
     .nbtn{
@@ -178,9 +164,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-
-      /* „höher als breit“ */
-      height:56px;
+      height:56px;                /* höher als breit */
       font-weight:1000;
       font-size:22px;
       color:var(--text);
@@ -188,24 +172,26 @@
     .nbtn:hover{ background: rgba(255,255,255,.12); }
     .nbtn:active{ transform: scale(.985); }
 
-    .done{
-      margin-top:12px;
-      padding:10px 12px;
-      border-radius:16px;
-      border:1px solid rgba(0,255,170,.35);
-      background: rgba(0,255,170,.08);
-      color: rgba(220,255,245,.95);
-      font-weight:900;
-      display:none;
+    /* Gewonnen-Overlay */
+    .win{
+      background:#000 !important;
     }
-    .done.show{ display:block; }
+    .win .cardNum{
+      color:#fff;
+      font-size:44px;
+      letter-spacing:2px;
+      text-transform:uppercase;
+      text-shadow:none;
+    }
+    .win .cardEmptyHint{ display:none; }
+    .win::after{ display:none; }
   </style>
 </head>
 
 <body>
   <div class="app">
     <div class="title" aria-label="Titel">
-      <span class="kipp">KIPP</span><span class="stich">stich</span>
+      <span class="kipp">KIPP</span><span class="stich">Stich</span>
     </div>
 
     <div class="status">
@@ -214,26 +200,23 @@
     </div>
 
     <div class="cardWrap">
-      <div class="card" id="card" title="Zahl wählen → wird als +1 angezeigt. Dann auf die Karte tippen = Kärtchen erledigt.">
+      <div class="card" id="card" title="Zahl wählen → im Kärtchen steht +1 (12→1). Dann auf die Karte tippen = Kärtchen weg.">
         <div class="cardNum" id="cardNum"></div>
         <div class="cardEmptyHint" id="cardHint">Zahl antippen (1–12) → +1 erscheint</div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="panelHeader">
-        <h2>Zahlenblock</h2>
-        <div class="small">Du tippst die Zahl an deiner Farbe – im Kärtchen steht automatisch <b>+1</b> (12→1).</div>
+      <div class="panelTop">
+        <button id="btnReset">Reset</button>
       </div>
 
       <div class="numbers" id="numbers"></div>
-
-      <div class="done" id="doneBox">✅ Fertig! Keine Kärtchen mehr. Drück „Neues Spiel“.</div>
     </div>
   </div>
 
 <script>
-  // Deine LENNOY-Farben (RGB) – passend zu deinem Setup
+  // Farben (wie bisher)
   const COLORS = [
     { name: "Grün",    rgb: "rgb(0,166,82)" },
     { name: "Violett", rgb: "rgb(164,27,133)" },
@@ -241,10 +224,11 @@
     { name: "Orange",  rgb: "rgb(249,150,30)" },
   ];
 
-  const WIN_TARGET = 4;         // 4x Karte wegklicken = fertig
-  let cleared = 0;              // wie oft du die Karte „erledigt“ hast
-  let currentColor = 0;         // index in COLORS
-  let shownNum = null;          // Zahl, die aktuell im Kärtchen steht (nach +1)
+  const WIN_TARGET = 4;
+
+  let cleared = 0;
+  let currentColor = 0;
+  let shownNum = null;
   let isFinished = false;
 
   const elCard = document.getElementById("card");
@@ -252,7 +236,6 @@
   const elCardHint = document.getElementById("cardHint");
   const elRemainingTxt = document.getElementById("remainingTxt");
   const elNumbers = document.getElementById("numbers");
-  const elDoneBox = document.getElementById("doneBox");
 
   function randInt(max){ return Math.floor(Math.random()*max); }
 
@@ -262,6 +245,7 @@
 
   function setCardColor(idx){
     currentColor = idx;
+    elCard.classList.remove("win");
     elCard.style.background = COLORS[idx].rgb;
   }
 
@@ -271,13 +255,13 @@
     else elRemainingTxt.textContent = `Noch ${remaining} Kärtchen`;
   }
 
-  function setFinished(flag){
-    isFinished = flag;
-    elDoneBox.classList.toggle("show", flag);
-    if(flag){
-      elCardNum.textContent = "";
-      elCardHint.textContent = "Fertig – Neues Spiel starten";
-    }
+  function showWinCard(){
+    isFinished = true;
+    elCard.classList.add("win");
+    elCard.style.background = "#000";
+    elCardNum.textContent = "GEWONNEN";
+    elCardHint.textContent = "";
+    shownNum = null;
   }
 
   function newEmptyCard(){
@@ -289,12 +273,11 @@
 
   function resetGame(){
     cleared = 0;
+    isFinished = false;
     updateRemaining();
-    setFinished(false);
     newEmptyCard();
   }
 
-  // Zahlenblock bauen
   function buildNumbers(){
     elNumbers.innerHTML = "";
     for(let n=1; n<=12; n++){
@@ -304,8 +287,6 @@
 
       btn.addEventListener("click", () => {
         if(isFinished) return;
-
-        // Zahl angetippt -> im Kärtchen +1 anzeigen
         shownNum = plusOneWrap(n);
         elCardNum.textContent = String(shownNum);
         elCardHint.textContent = "Wenn du erfolgreich gekippt hast: auf die Karte tippen";
@@ -315,26 +296,25 @@
     }
   }
 
-  // Auf Karte tippen = „Kärtchen erledigt“ (egal ob du es selbst oder ein anderer „weggekippte“)
+  // Karte antippen = Kärtchen weg
   elCard.addEventListener("click", () => {
     if(isFinished) return;
-
-    // nur wenn eine Zahl angezeigt wird (sonst wäre es ein Leerklick)
     if(shownNum == null) return;
 
     cleared += 1;
     updateRemaining();
 
+    // WICHTIG: Beim letzten Klick darf KEIN neues Farbkärtchen erscheinen.
     if(cleared >= WIN_TARGET){
-      setFinished(true);
+      showWinCard();
       return;
     }
 
-    // nächstes leeres Kärtchen
     newEmptyCard();
   });
 
   document.getElementById("btnNew").addEventListener("click", resetGame);
+  document.getElementById("btnReset").addEventListener("click", resetGame);
 
   buildNumbers();
   resetGame();
