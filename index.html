@@ -2,219 +2,181 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KIPPStich</title>
 
 <style>
-:root{
-  --wood-bg:#b07a52;      /* dunklerer Holzton */
-  --wood-bg-dark:#9a6845;
-  --bamboo:#d6c3a0;
-  --tile:#efe6d2;
-  --ink:#111;
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #d6c7a3; /* Kippbox-Innenraum */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
 
-  --green:#00a652;
-  --violet:#a41b85;
-  --blue:#006bb3;
-  --orange:#f9961e;
-}
+    .app {
+        width: 320px;
+        background: #e3d6b3;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+        text-align: center;
+    }
 
-*{
-  box-sizing:border-box;
-  touch-action:manipulation;
-}
+    h1 {
+        margin: 0 0 14px;
+        font-size: 30px;
+        letter-spacing: 1px;
+    }
 
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;              /* 🔒 kein Scrollen */
-  background:var(--wood-bg-dark);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-}
+    h1 span {
+        font-weight: normal;
+    }
 
-/* Fixierte Spielfläche */
-.stage{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:linear-gradient(
-    180deg,
-    var(--wood-bg),
-    var(--wood-bg-dark)
-  );
-}
+    .card-frame {
+        background: #c7b079; /* bambusartig */
+        padding: 10px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+    }
 
-/* Spielbrett */
-.app{
-  width:100%;
-  max-width:420px;
-  height:100%;
-  max-height:780px;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-}
+    .card {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 88px;   /* 👉 Zahl dominant */
+        font-weight: 800;
+        color: black;
+        background: gray;
+        box-shadow: inset -6px -6px 0 rgba(0,0,0,0.15);
+        cursor: pointer;
+    }
 
-/* Titel */
-h1{
-  margin:10px 0 12px;
-  text-align:center;
-  font-size:28px;
-  font-weight:800;
-  letter-spacing:1px;
-}
-h1 span{font-weight:500}
+    .numbers {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+    }
 
-/* Kartenrahmen */
-.card-frame{
-  background:var(--bamboo);
-  padding:14px;
-  border-radius:18px;
-  margin-bottom:10px;
-}
+    .num {
+        background: #f0e6c8;
+        border-radius: 8px;
+        padding: 14px 0;
+        font-size: 22px;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.15);
+    }
 
-/* Karte */
-.card{
-  width:100%;
-  aspect-ratio:1/1;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:64px;
-  font-weight:800;
-  color:#000;
-  user-select:none;
-}
+    .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.card.empty{
-  background:#000;
-  color:#fff;
-  font-size:24px;
-}
+    button {
+        background: #444;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 14px;
+        cursor: pointer;
+    }
 
-/* Status */
-.status{
-  text-align:center;
-  margin:8px 0;
-  font-weight:600;
-}
+    .counter {
+        font-size: 14px;
+    }
 
-/* Reset */
-.reset-btn{
-  width:100%;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:#222;
-  color:#fff;
-  font-size:16px;
-  margin-bottom:10px;
-}
-
-/* Zahlenblock */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
-
-.num{
-  background:var(--tile);
-  border-radius:10px;
-  padding:18px 0;     /* 🔼 hochformatiger */
-  font-size:22px;
-  font-weight:700;
-  text-align:center;
-  user-select:none;
-}
-
-.num:active{
-  transform:scale(0.95);
-}
+    .win {
+        background: black !important;
+        color: white !important;
+        font-size: 26px;
+        cursor: default;
+    }
 </style>
 </head>
 
 <body>
-<div class="stage">
-  <div class="app">
 
+<div class="app">
     <h1>KIPP<span>Stich</span></h1>
 
     <div class="card-frame">
-      <div id="card" class="card"></div>
+        <div id="card" class="card"></div>
     </div>
 
-    <div id="status" class="status"></div>
+    <div class="numbers" id="numbers"></div>
 
-    <button class="reset-btn" onclick="resetGame()">Reset</button>
-
-    <div class="grid" id="numbers"></div>
-
-  </div>
+    <div class="controls">
+        <button onclick="resetNumber()">Reset</button>
+        <div class="counter" id="counter"></div>
+    </div>
 </div>
 
 <script>
-const colors=[
-  {val:"#00a652"},
-  {val:"#a41b85"},
-  {val:"#006bb3"},
-  {val:"#f9961e"}
-];
+const colors = ["#2ecc71", "#3498db", "#9b59b6", "#f39c12"];
+let currentColor = colors[Math.floor(Math.random() * colors.length)];
+let clicks = 0;
+const maxClicks = 4;
 
-let remaining=4;
-let currentValue=null;
+const card = document.getElementById("card");
+const counter = document.getElementById("counter");
+const numbersDiv = document.getElementById("numbers");
 
-const card=document.getElementById("card");
-const status=document.getElementById("status");
-const numbers=document.getElementById("numbers");
-
-for(let i=1;i<=12;i++){
-  const d=document.createElement("div");
-  d.className="num";
-  d.textContent=i;
-  d.onclick=()=>pickNumber(i);
-  numbers.appendChild(d);
+function init() {
+    card.style.background = currentColor;
+    card.textContent = "";
+    updateCounter();
 }
 
-function newCard(){
-  if(remaining<=0){
-    card.className="card empty";
-    card.textContent="GEWONNEN";
-    status.textContent="";
-    return;
-  }
-  const c=colors[Math.floor(Math.random()*colors.length)];
-  card.className="card";
-  card.style.background=c.val;
-  card.textContent="";
-  currentValue=null;
-  status.textContent=`Noch ${remaining} Kärtchen`;
+function updateCounter() {
+    const remaining = maxClicks - clicks;
+    counter.textContent = remaining > 0
+        ? `Noch ${remaining} Kärtchen`
+        : "";
 }
 
-function pickNumber(n){
-  if(currentValue!==null || remaining<=0) return;
-  currentValue=n+1;
-  card.textContent=currentValue;
+for (let i = 1; i <= 12; i++) {
+    const d = document.createElement("div");
+    d.className = "num";
+    d.textContent = i;
+    d.onclick = () => selectNumber(i);
+    numbersDiv.appendChild(d);
 }
 
-card.onclick=()=>{
-  if(currentValue===null || remaining<=0) return;
-  remaining--;
-  newCard();
+function selectNumber(n) {
+    if (clicks >= maxClicks) return;
+    card.textContent = n + 1;
+}
+
+card.onclick = () => {
+    if (card.textContent === "" || clicks >= maxClicks) return;
+
+    clicks++;
+    card.textContent = "";
+
+    if (clicks === maxClicks) {
+        card.classList.add("win");
+        card.textContent = "Gewonnen";
+    }
+
+    updateCounter();
 };
 
-function resetGame(){
-  remaining=4;
-  newCard();
+function resetNumber() {
+    if (clicks < maxClicks) {
+        card.textContent = "";
+    }
 }
 
-newCard();
+init();
 </script>
 
 </body>
