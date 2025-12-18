@@ -4,151 +4,104 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KIPP Stich</title>
-
   <style>
     :root{
       --wood-bg:#b07a52;
       --wood-bg-dark:#9a6845;
-      --panel:#d6c3a0;
+      --tile:#efe6d2;
       --ink:#111;
+      --bamboo:#d6c3a0;
     }
-
     *{ box-sizing:border-box; }
-
     html,body{
-      margin:0;
-      height:100%;
-      background:linear-gradient(180deg,var(--wood-bg),var(--wood-bg-dark));
+      margin:0; height:100%;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--ink);
-      overflow:hidden;
+      background:linear-gradient(180deg,var(--wood-bg),var(--wood-bg-dark));
     }
-
-    .wrap{
+    .stage{
       height:100%;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:18px 16px;
+    }
+    .wrap{
+      width:100%;
+      max-width:420px;
+      min-height:100%;
       display:flex;
       flex-direction:column;
       align-items:center;
     }
-
     h1{
+      margin:6px 0 14px;
       width:100%;
       text-align:center;
-      margin:14px 0 0;
       font-size:34px;
       font-weight:900;
       letter-spacing:1px;
+      color:var(--ink);
     }
-
-    .hero{
+    .panel{
       width:100%;
-      flex:1;
-      display:flex;
-      align-items:flex-start;
-      justify-content:center;
-      padding-top:12vh; /* leicht über Mitte */
-    }
-
-    .card{
-      width:min(82vw, 360px);
-      background:var(--panel);
+      background:rgba(255,255,255,0.12);
       border-radius:18px;
-      padding:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,.25);
-      text-align:center;
+      padding:18px;
+      margin-top:6px;
     }
-
-    .logo-btn{
-      display:block;
+    .logoBtn{
       width:100%;
-      border-radius:14px;
-      overflow:hidden;
-      cursor:pointer;
-      border:0;
-      padding:0;
+      border:none;
       background:transparent;
+      padding:0;
+      cursor:pointer;
     }
-
+    .logoFrame{
+      width:100%;
+      background:var(--bamboo);
+      border-radius:18px;
+      padding:14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    }
     .logo{
       width:100%;
-      height:auto;
       display:block;
+      border-radius:14px;
+      background:var(--tile);
     }
-
     .hint{
-      margin:12px 0 0;
-      font-weight:700;
-      font-size:16px;
+      margin:14px 0 0;
+      text-align:center;
+      color:rgba(0,0,0,0.85);
+      font-weight:650;
     }
-
     .sub{
-      margin:4px 0 0;
-      opacity:.85;
-      font-size:13px;
-      font-weight:600;
+      margin:6px 0 0;
+      text-align:center;
+      color:rgba(0,0,0,0.7);
+      font-weight:550;
+      font-size:14px;
     }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <h1>Kippstich</h1>
+  <div class="stage">
+    <div class="wrap">
+      <h1>KIPP Stich</h1>
 
-    <div class="hero">
-      <div class="card">
-        <button class="logo-btn" id="startBtn" aria-label="Kippstich starten">
-          <img id="logoImg" class="logo" alt="Kippstich Logo">
+      <div class="panel" style="margin-top:18px;">
+        <button class="logoBtn" onclick="location.href='kippstich.html'" aria-label="Spiel starten">
+          <div class="logoFrame">
+            <img class="logo" src="Logo-Kippstich.png" alt="KIPP Stich Logo">
+          </div>
         </button>
-        <div class="hint">Tippe auf das Logo, um zu starten</div>
-        <div class="sub">(öffnet kippstich.html)</div>
+
+        <div class="hint">Klick auf das Icon, um das Spiel zu starten</div>
+        <div class="sub">(Du kannst später jederzeit zurück zur Startseite.)</div>
       </div>
+
+      <div style="flex:1"></div>
     </div>
   </div>
-
-  <script>
-    // Klick -> Spiel
-    document.getElementById("startBtn").addEventListener("click", () => {
-      window.location.href = "kippstich.html";
-    });
-
-    // Logo-Fallback-Lader: probiert mehrere Dateinamen durch,
-    // damit es bei dir sicher angezeigt wird, ohne Umbenennen.
-    const candidates = [
-      "logo-kippstich.png",
-      "Logo-Kippstich.png",
-      "Logo-Kippstich.PNG",
-      "Logo-Kippstich BNG.png",
-      "Logo-Kippstich BNG.PNG",
-      "logo-kippstich-bng.png",
-      "Kippstich-Logo.png",
-      "kippstich-logo.png",
-      "logo-kippstich bng.png",
-      "logo-kippstich bng.PNG"
-    ];
-
-    const img = document.getElementById("logoImg");
-    let i = 0;
-
-    function tryNext(){
-      if(i >= candidates.length){
-        // Wenn gar nichts passt, zeigen wir wenigstens Text statt leerem Feld.
-        img.remove();
-        const fallback = document.createElement("div");
-        fallback.style.padding = "28px 10px";
-        fallback.style.borderRadius = "14px";
-        fallback.style.background = "rgba(255,255,255,.35)";
-        fallback.style.fontWeight = "900";
-        fallback.style.fontSize = "18px";
-        fallback.textContent = "LOGO DATEI NICHT GEFUNDEN";
-        document.getElementById("startBtn").appendChild(fallback);
-        return;
-      }
-      const name = candidates[i++];
-      img.onerror = tryNext;
-      img.src = name;
-    }
-
-    tryNext();
-  </script>
 </body>
 </html>
