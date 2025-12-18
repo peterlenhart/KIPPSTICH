@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIPPStich</title>
+
+<style>
+:root{
+  --wood-bg:#b07a52;
+  --wood-bg-dark:#8f5f3f;
+  --bamboo:#d6c3a0;
+  --tile:#efe6d2;
+  --ink:#111;
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:var(--wood-bg-dark);
+  font-family:system-ui, sans-serif;
+  overflow:hidden;
+}
+
+.stage{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg, var(--wood-bg), var(--wood-bg-dark));
+}
+
+.app{
+  width:100%;
+  max-width:420px;
+  height:100%;
+  max-height:780px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+}
+
+h1{
+  text-align:center;
+  font-size:28px;
+  margin:10px 0 12px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+h1 span{ font-weight:500; }
+
+.card-frame{
+  position:relative;            /* ✅ neu */
+  background:var(--bamboo);
+  padding:14px;
+  border-radius:18px;
+  margin-bottom:12px;           /* ein bisschen Luft */
+}
+
+.card{
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:160px;
+  font-weight:900;
+  color:#000;
+  user-select:none;
+}
+
+.card.empty{
+  background:var(--wood-bg-dark);
+  color:#fff;
+  font-size:26px;
+  letter-spacing:1px;
+}
+
+.count-badge{
+  position:absolute;
+  left:50%;
+  bottom:20px;                  /* ✅ sitzt “im Kärtchenbereich” */
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.25);
+  color:#fff;
+  padding:6px 12px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:16px;
+  letter-spacing:0.3px;
+  user-select:none;
+  pointer-events:none;
+}
+
+.status{
+  /* ✅ Statuszeile bleibt, nimmt aber keinen Platz mehr ein */
+  height:0;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  margin-bottom:10px;
+  background:#222;
+  color:#fff;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.num{
+  background:var(--tile);
+  border-radius:10px;
+  padding:20px 0;
+  font-size:22px;
+  font-weight:700;
+  text-align:center;
+  user-select:none;
+}
+.num:active{ transform:scale(0.95); }
+.num.disabled{ opacity:0.3; pointer-events:none; }
+</style>
+</head>
+
+<body>
+<div class="stage">
+  <div class="app">
+
+    <h1>KIPP<span>Stich</span></h1>
+
+    <div class="card-frame">
+      <div id="card" class="card"></div>
+      <div id="badge" class="count-badge"></div>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <button id="resetBtn">Reset</button>
+
+    <div class="grid" id="numbers"></div>
+
+  </div>
+</div>
+
+<script>
+const colors = ["#00a652","#a41b85","#006bb3","#f9961e"];
+
+let remaining = 4;
+let currentValue = null;
+let currentColor = null;
+let gameOver = false;
+
+const card = document.getElementById("card");
+const badge = document.getElementById("badge");
+const numbers = document.getElementById("numbers");
+const resetBtn = document.getElementById("resetBtn");
+
+for(let i=1;i<=12;i++){
+  const d=document.createElement("div");
+  d.className="num";
+  d.textContent=i;
+  d.onclick=()=>pickNumber(i);
+  numbers.appendChild(d);
+}
+
+function enableNumbers(on){
+  document.querySelectorAll(".num").forEach(n=>{
+    n.classList.toggle("disabled", !on);
+  });
+}
+
+function startGame(){
+  remaining = 4;
+  currentValue = null;
+  gameOver = false;
+  resetBtn.textContent = "Reset";
+  enableNumbers(true);
+
+  currentColor = colors[Math.floor(Math.random()*colors.length)];
+  showCardEmptyNumber();
+  updateBadge();
+}
+
+function updateBadge(){
+  if(gameOver){
+    badge.textContent = "";
+    return;
+  }
+  badge.textContent = `Noch ${remaining} Kärtchen`;
+}
+
+function showCardEmptyNumber(){
+  card.className = "card";
+  card.style.background = currentColor;
+  card.textContent = "";
+  currentValue = null;
+}
+
+function endGame(){
+  gameOver = true;
+  enableNumbers(false);
+  resetBtn.textContent = "Neues Spiel";
+
+  card.className = "card empty";
+  card.style.background = "";
+  card.textContent = "GEWONNEN";
+  badge.textContent = "";          // ✅ kein Badge im Endscreen
+}
+
+function plusOneCyclic(n){
+  return (n % 12) + 1;
+}
+
+function pickNumber(n){
+  if(gameOver) return;
+  if(currentValue !== null) return;
+
+  currentValue = plusOneCyclic(n);
+  card.textContent = currentValue;
+}
+
+card.onclick = ()=>{
+  if(gameOver) return;
+  if(currentValue === null) return;
+
+  remaining--;
+
+  if(remaining <= 0){
+    endGame();
+    return;
+  }
+
+  currentColor = colors[Math.floor(Math.random()*colors.length)];
+  showCardEmptyNumber();
+  updateBadge();
+};
+
+resetBtn.onclick = ()=>{
+  if(gameOver){
+    startGame();
+    return;
+  }
+  currentValue = null;
+  card.textContent = "";
+};
+
+startGame();
+</script>
+
+</body>
+</html>
