@@ -8,7 +8,7 @@
 <style>
 :root{
   --wood-bg:#b07a52;
-  --wood-bg-dark:#9a6845;
+  --wood-bg-dark:#8f5f3f;
   --bamboo:#d6c3a0;
   --tile:#efe6d2;
   --ink:#111;
@@ -19,19 +19,14 @@
   --orange:#f9961e;
 }
 
-*{
-  box-sizing:border-box;
-  touch-action:manipulation;
-}
+*{ box-sizing:border-box; }
 
 html,body{
   margin:0;
-  padding:0;
   width:100%;
   height:100%;
-  overflow:hidden;
   background:var(--wood-bg-dark);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family:system-ui, sans-serif;
 }
 
 .stage{
@@ -40,11 +35,6 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(
-    180deg,
-    var(--wood-bg),
-    var(--wood-bg-dark)
-  );
 }
 
 .app{
@@ -58,19 +48,16 @@ html,body{
 }
 
 h1{
-  margin:10px 0 12px;
   text-align:center;
   font-size:28px;
-  font-weight:800;
-  letter-spacing:1px;
+  margin:10px 0;
 }
-h1 span{font-weight:500}
+h1 span{ font-weight:500; }
 
 .card-frame{
   background:var(--bamboo);
   padding:14px;
   border-radius:18px;
-  margin-bottom:10px;
 }
 
 .card{
@@ -87,26 +74,25 @@ h1 span{font-weight:500}
 }
 
 .card.empty{
-  background:#000;
+  background:var(--wood-bg-dark);
   color:#fff;
-  font-size:24px;
+  font-size:26px;
 }
 
 .status{
   text-align:center;
-  margin:8px 0;
+  margin:10px 0;
   font-weight:600;
 }
 
-.reset-btn{
-  width:100%;
+button{
   padding:10px;
   border:none;
   border-radius:10px;
-  background:#222;
-  color:#fff;
   font-size:16px;
   margin-bottom:10px;
+  background:#222;
+  color:#fff;
 }
 
 .grid{
@@ -119,52 +105,48 @@ h1 span{font-weight:500}
   background:var(--tile);
   border-radius:10px;
   padding:20px 0;
-  font-size:24px;
+  font-size:22px;
   font-weight:700;
   text-align:center;
-  user-select:none;
 }
-
-.num:active{
-  transform:scale(0.95);
-}
+.num:active{ transform:scale(0.95); }
+.num.disabled{ opacity:0.3; pointer-events:none; }
 </style>
 </head>
 
 <body>
 <div class="stage">
-  <div class="app">
+<div class="app">
 
-    <h1>KIPP<span>Stich</span></h1>
+<h1>KIPP<span>Stich</span></h1>
 
-    <div class="card-frame">
-      <div id="card" class="card"></div>
-    </div>
+<div class="card-frame">
+  <div id="card" class="card"></div>
+</div>
 
-    <div id="status" class="status"></div>
+<div id="status" class="status"></div>
 
-    <button class="reset-btn" onclick="resetGame()">Reset</button>
+<button id="resetBtn">Reset</button>
 
-    <div class="grid" id="numbers"></div>
+<div class="grid" id="numbers"></div>
 
-  </div>
+</div>
 </div>
 
 <script>
-const colors=[
-  {val:"#00a652"},
-  {val:"#a41b85"},
-  {val:"#006bb3"},
-  {val:"#f9961e"}
-];
+const colors = ["#00a652","#a41b85","#006bb3","#f9961e"];
 
-let remaining=4;
-let currentValue=null;
+let remaining = 4;
+let currentValue = null;
+let currentColor = null;
+let gameOver = false;
 
-const card=document.getElementById("card");
-const status=document.getElementById("status");
-const numbers=document.getElementById("numbers");
+const card = document.getElementById("card");
+const status = document.getElementById("status");
+const numbers = document.getElementById("numbers");
+const resetBtn = document.getElementById("resetBtn");
 
+/* Zahlenblock */
 for(let i=1;i<=12;i++){
   const d=document.createElement("div");
   d.className="num";
@@ -173,41 +155,67 @@ for(let i=1;i<=12;i++){
   numbers.appendChild(d);
 }
 
-function newCard(){
+function startGame(){
+  remaining = 4;
+  gameOver = false;
+  newCard(true);
+  resetBtn.textContent = "Reset";
+  enableNumbers(true);
+}
+
+function newCard(forceNewColor=false){
   if(remaining<=0){
-    card.className="card empty";
-    card.textContent="GEWONNEN";
-    status.textContent="";
+    endGame();
     return;
   }
-  const c=colors[Math.floor(Math.random()*colors.length)];
+  if(forceNewColor){
+    currentColor = colors[Math.floor(Math.random()*colors.length)];
+  }
   card.className="card";
-  card.style.background=c.val;
+  card.style.background=currentColor;
   card.textContent="";
   currentValue=null;
   status.textContent=`Noch ${remaining} Kärtchen`;
 }
 
-function pickNumber(n){
-  if(currentValue!==null || remaining<=0) return;
-  currentValue=n+1;
-  card.textContent=currentValue;
+function endGame(){
+  gameOver = true;
+  card.className="card empty";
+  card.textContent="GEWONNEN";
+  status.textContent="";
+  enableNumbers(false);
+  resetBtn.textContent = "Neues Spiel";
 }
 
-card.onclick=()=>{
-  if(currentValue===null || remaining<=0) return;
+function pickNumber(n){
+  if(currentValue!==null || gameOver) return;
+  currentValue = n+1;
+  card.textContent = currentValue;
+}
+
+card.onclick = ()=>{
+  if(currentValue===null || gameOver) return;
   remaining--;
-  newCard();
+  newCard(false);
 };
 
-/* ✅ RESET: löscht NUR die Zahl */
-function resetGame(){
-  if(currentValue===null) return;
-  currentValue=null;
-  card.textContent="";
+resetBtn.onclick = ()=>{
+  if(gameOver){
+    startGame();
+  }else{
+    // RESET löscht NUR die Zahl
+    currentValue = null;
+    card.textContent = "";
+  }
+};
+
+function enableNumbers(on){
+  document.querySelectorAll(".num").forEach(n=>{
+    n.classList.toggle("disabled", !on);
+  });
 }
 
-newCard();
+startGame();
 </script>
 
 </body>
