@@ -2,57 +2,83 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KIPPStich</title>
 
 <style>
 :root{
-  --wood-bg: #c08a63;
-  --bamboo: #d9c7a3;
-  --tile: #efe6d2;
-  --ink: #111;
+  --wood-bg:#b07a52;      /* dunklerer Holzton */
+  --wood-bg-dark:#9a6845;
+  --bamboo:#d6c3a0;
+  --tile:#efe6d2;
+  --ink:#111;
+
   --green:#00a652;
   --violet:#a41b85;
   --blue:#006bb3;
   --orange:#f9961e;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+  touch-action:manipulation;
+}
 
-body{
+html,body{
   margin:0;
-  min-height:100vh;
-  background: linear-gradient(180deg,#c99a72,#c08a63,#b07a52);
+  padding:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;              /* 🔒 kein Scrollen */
+  background:var(--wood-bg-dark);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* Fixierte Spielfläche */
+.stage{
+  width:100%;
+  height:100%;
   display:flex;
   align-items:center;
   justify-content:center;
-  color:var(--ink);
+  background:linear-gradient(
+    180deg,
+    var(--wood-bg),
+    var(--wood-bg-dark)
+  );
 }
 
+/* Spielbrett */
 .app{
   width:100%;
   max-width:420px;
-  background:transparent;
+  height:100%;
+  max-height:780px;
   padding:16px;
-  text-align:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
 }
 
 /* Titel */
 h1{
-  margin:8px 0 16px;
+  margin:10px 0 12px;
+  text-align:center;
+  font-size:28px;
   font-weight:800;
   letter-spacing:1px;
 }
 h1 span{font-weight:500}
 
-/* Kartenbereich */
+/* Kartenrahmen */
 .card-frame{
   background:var(--bamboo);
   padding:14px;
   border-radius:18px;
-  margin-bottom:14px;
+  margin-bottom:10px;
 }
 
+/* Karte */
 .card{
   width:100%;
   aspect-ratio:1/1;
@@ -63,7 +89,6 @@ h1 span{font-weight:500}
   font-size:64px;
   font-weight:800;
   color:#000;
-  cursor:pointer;
   user-select:none;
 }
 
@@ -71,12 +96,12 @@ h1 span{font-weight:500}
   background:#000;
   color:#fff;
   font-size:24px;
-  cursor:default;
 }
 
 /* Status */
 .status{
-  margin:10px 0;
+  text-align:center;
+  margin:8px 0;
   font-weight:600;
 }
 
@@ -84,13 +109,12 @@ h1 span{font-weight:500}
 .reset-btn{
   width:100%;
   padding:10px;
-  margin-bottom:10px;
   border:none;
   border-radius:10px;
   background:#222;
   color:#fff;
   font-size:16px;
-  cursor:pointer;
+  margin-bottom:10px;
 }
 
 /* Zahlenblock */
@@ -103,10 +127,10 @@ h1 span{font-weight:500}
 .num{
   background:var(--tile);
   border-radius:10px;
-  padding:16px 0;
+  padding:18px 0;     /* 🔼 hochformatiger */
   font-size:22px;
   font-weight:700;
-  cursor:pointer;
+  text-align:center;
   user-select:none;
 }
 
@@ -117,49 +141,45 @@ h1 span{font-weight:500}
 </head>
 
 <body>
-<div class="app">
+<div class="stage">
+  <div class="app">
 
-  <h1>KIPP<span>Stich</span></h1>
+    <h1>KIPP<span>Stich</span></h1>
 
-  <div class="card-frame">
-    <div id="card" class="card"></div>
+    <div class="card-frame">
+      <div id="card" class="card"></div>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <button class="reset-btn" onclick="resetGame()">Reset</button>
+
+    <div class="grid" id="numbers"></div>
+
   </div>
-
-  <div id="status" class="status"></div>
-
-  <button class="reset-btn" onclick="resetGame()">Reset</button>
-
-  <div class="grid" id="numbers"></div>
-
 </div>
 
 <script>
 const colors=[
-  {name:"green",val:getComputedStyle(document.documentElement).getPropertyValue('--green')},
-  {name:"violet",val:getComputedStyle(document.documentElement).getPropertyValue('--violet')},
-  {name:"blue",val:getComputedStyle(document.documentElement).getPropertyValue('--blue')},
-  {name:"orange",val:getComputedStyle(document.documentElement).getPropertyValue('--orange')}
+  {val:"#00a652"},
+  {val:"#a41b85"},
+  {val:"#006bb3"},
+  {val:"#f9961e"}
 ];
 
 let remaining=4;
-let currentColor=null;
 let currentValue=null;
 
 const card=document.getElementById("card");
 const status=document.getElementById("status");
 const numbers=document.getElementById("numbers");
 
-/* Zahlenblock erzeugen */
 for(let i=1;i<=12;i++){
   const d=document.createElement("div");
   d.className="num";
   d.textContent=i;
   d.onclick=()=>pickNumber(i);
   numbers.appendChild(d);
-}
-
-function randomColor(){
-  return colors[Math.floor(Math.random()*colors.length)];
 }
 
 function newCard(){
@@ -169,22 +189,20 @@ function newCard(){
     status.textContent="";
     return;
   }
-  const c=randomColor();
-  currentColor=c;
-  currentValue=null;
+  const c=colors[Math.floor(Math.random()*colors.length)];
   card.className="card";
   card.style.background=c.val;
   card.textContent="";
+  currentValue=null;
   status.textContent=`Noch ${remaining} Kärtchen`;
 }
 
 function pickNumber(n){
-  if(!currentColor || currentValue!==null || remaining<=0) return;
+  if(currentValue!==null || remaining<=0) return;
   currentValue=n+1;
   card.textContent=currentValue;
 }
 
-/* Kärtchen wegklicken */
 card.onclick=()=>{
   if(currentValue===null || remaining<=0) return;
   remaining--;
@@ -196,7 +214,6 @@ function resetGame(){
   newCard();
 }
 
-/* Start */
 newCard();
 </script>
 
